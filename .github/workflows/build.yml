@@ -1,4 +1,4 @@
-name: Build, Test, and Publish Wheels
+name: Build and Publish Wheels
 
 on:
   push:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Install Boost (macOS)
         if: matrix.os == 'macos-latest'
-        run: brew install boost-python3 boost-graph
+        run: brew install boost
 
       - name: Install Boost (Windows)
         if: matrix.os == 'windows-latest'
