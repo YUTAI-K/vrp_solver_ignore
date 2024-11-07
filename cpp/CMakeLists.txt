@@ -37,7 +37,7 @@ target_include_directories(cppWrapper
 if(WIN32)
     set(LIB_EXTENSION ".dll")
 elseif(APPLE)
-    set(LIB_EXTENSION ".dylib")
+    set(LIB_EXTENSION ".so")
 else()
     set(LIB_EXTENSION ".so")
 endif()

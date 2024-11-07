@@ -7,7 +7,7 @@ current_platform = platform.system()
 if current_platform == "Windows":
     lib_ext = ".dll"
 elif current_platform == "Darwin":
-    lib_ext = ".dylib"
+    lib_ext = ".so"
 else:
     lib_ext = ".so"
 

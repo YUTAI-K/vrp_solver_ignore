@@ -26,7 +26,7 @@ cmake --build . --config Release
 
 # Determine the shared library extension
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    LIB_EXT=".dylib"
+    LIB_EXT=".so"
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     LIB_EXT=".so"
 elif [[ "$OSTYPE" == "msys"* ]]; then
