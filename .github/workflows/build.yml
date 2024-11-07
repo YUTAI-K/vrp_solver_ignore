@@ -61,7 +61,8 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Build wheels
-        run: cibuildwheel --output-dir wheelhouse
+        run: |
+          CIBW_BUILD_VERBOSITY=1 cibuildwheel --output-dir wheelhouse
 
       - name: Upload wheels as artifact
         uses: actions/upload-artifact@v3
