@@ -43,6 +43,6 @@ setup(
         "Programming Language :: C++",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.8',  # Specify the minimum Python version
+    python_requires='>=3.10',  # Specify the minimum Python version
     zip_safe=False,  # Typically False for packages with compiled extensions
 )
