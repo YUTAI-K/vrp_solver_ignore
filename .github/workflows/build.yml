@@ -1,4 +1,4 @@
-name: Build, test and Publish Wheels
+name: Build, Test, and Publish Wheels
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
     branches:
       - main
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   build_wheels:
@@ -16,8 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10"]
-        # Adjust Python versions as needed
+        python-version: ["3.10"]  # Ensure versions are correct and quoted
 
     steps:
       - name: Checkout code
@@ -33,7 +32,7 @@ jobs:
 
       - name: Install Boost (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y libboost-python-dev libboost-graph-dev
+        run: sudo apt-get update && sudo apt-get install -y libboost-python-dev libboost-graph-dev cmake
 
       - name: Install Boost (macOS)
         if: matrix.os == 'macos-latest'
@@ -41,7 +40,13 @@ jobs:
 
       - name: Install Boost (Windows)
         if: matrix.os == 'windows-latest'
-        run: choco install boost-msvc
+        run: |
+          choco install boost-msvc
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+
+      - name: List Boost libraries (macOS)
+        if: matrix.os == 'macos-latest'
+        run: ls /opt/homebrew/lib | grep boost_python
 
       - name: Build C++ extension (Linux/macOS)
         run: |
@@ -69,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.10, 3.11]
+        python-version: ["3.10"]
 
     steps:
       - name: Checkout code

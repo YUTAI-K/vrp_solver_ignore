@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(cppWrapper)
 set(CMAKE_CXX_STANDARD 23)
+cmake_policy(SET CMP0167 OLD)          # Prefer FindBoost over BoostConfig
 # Add the Python module
 add_library(cppWrapper SHARED
         src/library.cpp
@@ -12,7 +13,7 @@ add_library(cppWrapper SHARED
 
 
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED )
-find_package(Boost REQUIRED COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
+find_package(Boost REQUIRED COMPONENTS python310)
 find_package(Boost REQUIRED COMPONENTS graph) # Find Boost graph component
 
 
@@ -20,7 +21,7 @@ target_link_libraries(cppWrapper
         PRIVATE
         Python3::Python
         Python3::Module
-        Boost::python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}
+        Boost::python310
         Boost::graph
 )
 
@@ -30,6 +31,23 @@ target_include_directories(cppWrapper
         ${Python3_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS}
 )
+
+
+# Determine the shared library extension
+if(WIN32)
+    set(LIB_EXTENSION ".dll")
+elseif(APPLE)
+    set(LIB_EXTENSION ".dylib")
+else()
+    set(LIB_EXTENSION ".so")
+endif()
+
+# Set the output name with the correct extension
+set_target_properties(cppWrapper PROPERTIES
+    SUFFIX "${LIB_EXTENSION}"
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../src/vrp_solver_ignore
+)
+
 
 set_target_properties(cppWrapper PROPERTIES PREFIX "" SUFFIX ".so") 
 

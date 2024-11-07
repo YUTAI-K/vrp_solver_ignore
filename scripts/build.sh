@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x  # Enable verbose logging for debugging
 
 # Navigate to the C++ directory
 cd cpp
@@ -8,14 +9,22 @@ cd cpp
 mkdir -p build
 cd build
 
-# Configure CMake
-cmake .. -DCMAKE_BUILD_TYPE=Release
+# Detect architecture and set BOOST_ROOT accordingly
+if [[ "$(uname -m)" == "arm64" ]]; then
+    export BOOST_ROOT=/opt/homebrew/opt/boost
+    export BOOST_LIBRARYDIR=/opt/homebrew/lib
+else
+    export BOOST_ROOT=/usr/local/opt/boost
+    export BOOST_LIBRARYDIR=/usr/local/lib
+fi
+
+# Configure CMake with Boost paths
+cmake .. -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=$BOOST_ROOT -DBOOST_LIBRARYDIR=$BOOST_LIBRARYDIR
 
 # Build the shared library
 cmake --build . --config Release
 
-# Copy the shared library to the Python package directory
-# Adjust the library extension if necessary
+# Determine the shared library extension
 if [[ "$OSTYPE" == "darwin"* ]]; then
     LIB_EXT=".dylib"
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
