@@ -145,9 +145,9 @@ jobs:
       # Build wheels with maximum verbosity
       - name: Build wheels
         run: |
-          CIBW_BUILD_VERBOSITY=2 cibuildwheel --output-dir wheelhouse
+          CIBW_BUILD_VERBOSITY=1 cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 2  # Maximum verbosity for detailed logs
+          CIBW_BUILD_VERBOSITY: 1  #
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact
