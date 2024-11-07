@@ -79,8 +79,18 @@ jobs:
         shell: cmd
         if: matrix.os == 'windows-latest'
 
+      # **New Step: List Package Directory Contents**
+      - name: List Package Directory Contents
+        run: |
+          echo "Listing contents of the package directory:"
+          ls -R src/vrp_solver_ignore
+        shell: bash
+
       - name: Build wheels
-        run: cibuildwheel --output-dir wheelhouse
+        run: |
+          CIBW_BUILD_VERBOSITY=1 cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_BUILD_VERBOSITY: 1  # Enables verbose logging
 
       - name: Upload wheels as artifact
         uses: actions/upload-artifact@v3
