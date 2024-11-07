@@ -13,7 +13,7 @@ add_library(cppWrapper SHARED
 
 
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED )
-find_package(Boost REQUIRED COMPONENTS python310)
+find_package(Boost REQUIRED COMPONENTS python)
 find_package(Boost REQUIRED COMPONENTS graph) # Find Boost graph component
 
 
@@ -21,7 +21,7 @@ target_link_libraries(cppWrapper
         PRIVATE
         Python3::Python
         Python3::Module
-        Boost::python310
+        Boost::python
         Boost::graph
 )
 
