@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10"]  # Restrict to Python 3.10 as per your preference
+        python-version: ["3.10"]  # Adjust as needed
 
     steps:
       - name: Checkout code
@@ -39,7 +39,7 @@ jobs:
 
       - name: Install Boost and CMake (macOS)
         if: matrix.os == 'macos-latest'
-        run: brew install boost cmake boost-python3
+        run: brew install boost cmake python@3.10 boost-python3
 
       - name: Install Boost and CMake (Windows)
         if: matrix.os == 'windows-latest'
@@ -64,9 +64,7 @@ jobs:
           gcc --version
           g++ --version
 
-      # For macOS and Windows, ensure the latest Clang or appropriate compiler is used
-      # (Optional: Upgrade Clang if necessary)
-
+      # Build C++ extension (Linux/macOS)
       - name: Build C++ extension (Linux/macOS)
         run: |
           chmod +x scripts/build.sh
@@ -74,24 +72,84 @@ jobs:
         shell: bash
         if: matrix.os != 'windows-latest'
 
+      # Build C++ extension (Windows)
       - name: Build C++ extension (Windows)
         run: scripts\build.bat
         shell: cmd
         if: matrix.os == 'windows-latest'
 
-      # **New Step: List Package Directory Contents**
+      # Set environment variables for setup.py
+      - name: Set environment variables for setup.py (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          echo "BOOST_INCLUDE_DIR=/opt/homebrew/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARY_DIR=/opt/homebrew/lib" >> $GITHUB_ENV
+
+      - name: Set environment variables for setup.py (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          echo "BOOST_INCLUDE_DIR=/usr/local/include" >> $GITHUB_ENV
+          echo "BOOST_LIBRARY_DIR=/usr/local/lib" >> $GITHUB_ENV
+
+      # List Package Directory Contents
       - name: List Package Directory Contents
         run: |
           echo "Listing contents of the package directory:"
           ls -R src/vrp_solver_ignore
         shell: bash
+        if: matrix.os != 'windows-latest'
 
+      # Archive and Upload Package Directory (Optional)
+      - name: Archive Package Directory
+        if: matrix.os != 'windows-latest'
+        run: |
+          tar -czvf package.tar.gz src/vrp_solver_ignore
+        shell: bash
+
+      - name: Upload Package Archive
+        if: matrix.os != 'windows-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: package-archive-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: package.tar.gz
+
+      # Inspect setup.py
+      - name: Inspect setup.py
+        run: |
+          echo "Displaying setup.py content:"
+          cat setup.py
+        shell: bash
+
+      # Validate setup.py Packaging
+      - name: Validate setup.py Packaging
+        run: |
+          python setup.py check --metadata --restructuredtext
+        shell: bash
+
+      # Inspect the Extension Module
+      - name: Inspect Extension Module
+        run: |
+          echo "Inspecting cppWrapper.so with otool:"
+          otool -L src/vrp_solver_ignore/cppWrapper.so || echo "otool not found or cppWrapper.so missing."
+        shell: bash
+        if: matrix.os != 'windows-latest'
+
+      # Inspect the Shared Library Symbols
+      - name: Inspect Shared Library Symbols
+        run: |
+          echo "Inspecting symbols in cppWrapper.so:"
+          nm src/vrp_solver_ignore/cppWrapper.so | grep PYBIND11_MODULE || echo "No PYBIND11_MODULE found."
+        shell: bash
+        if: matrix.os != 'windows-latest'
+
+      # Build wheels with maximum verbosity
       - name: Build wheels
         run: |
-          CIBW_BUILD_VERBOSITY=1 cibuildwheel --output-dir wheelhouse
+          CIBW_BUILD_VERBOSITY=2 cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 1  # Enables verbose logging
+          CIBW_BUILD_VERBOSITY: 2  # Maximum verbosity for detailed logs
 
+      # Upload wheels as artifact
       - name: Upload wheels as artifact
         uses: actions/upload-artifact@v3
         with:
