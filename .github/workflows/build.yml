@@ -1,6 +1,4 @@
-# File: .github/workflows/build-and-publish.yml
-
-name: Build and Publish Wheels
+name: Build, Test, and Publish Wheels
 
 on:
   push:
@@ -19,11 +17,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.10, 3.11]
+        # Adjust Python versions as needed
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -31,27 +31,27 @@ jobs:
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
-      - name: Install Dependencies (Linux)
+      - name: Install Boost (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y libboost-python-dev libboost-graph-dev
 
-      - name: Install Dependencies (macOS)
+      - name: Install Boost (macOS)
         if: matrix.os == 'macos-latest'
         run: brew install boost-python3 boost-graph
 
-      - name: Install Dependencies (Windows)
+      - name: Install Boost (Windows)
         if: matrix.os == 'windows-latest'
         run: choco install boost-msvc
 
       - name: Build C++ extension (Linux/macOS)
         run: |
-          chmod +x build.sh
-          ./build.sh
+          chmod +x scripts/build.sh
+          ./scripts/build.sh
         shell: bash
         if: matrix.os != 'windows-latest'
 
       - name: Build C++ extension (Windows)
-        run: build.bat
+        run: scripts\build.bat
         shell: cmd
         if: matrix.os == 'windows-latest'
 
@@ -63,6 +63,37 @@ jobs:
         with:
           name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
           path: wheelhouse/*.whl
+
+  # test_wheels:
+  #   needs: build_wheels
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python-version: [3.10, 3.11]
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: Download wheels
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: wheels-ubuntu-latest-py*
+  #         path: wheelhouse
+
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+
+  #     - name: Install wheel
+  #       run: pip install wheelhouse/*.whl
+
+  #     - name: Install test dependencies
+  #       run: pip install -r requirements.txt
+
+  #     - name: Run tests
+  #       run: pytest tests/
 
   publish_wheels:
     needs: build_wheels
