@@ -45,11 +45,10 @@ endif()
 # Set the output name with the correct extension
 set_target_properties(cppWrapper PROPERTIES
     SUFFIX "${LIB_EXTENSION}"
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../src/vrp_solver_ignore
 )
 
 
-set_target_properties(cppWrapper PROPERTIES PREFIX "" SUFFIX ".so") 
+set_target_properties(cppWrapper PROPERTIES PREFIX "") 
 
 message(STATUS "Python3 Interpreter: ${Python3_EXECUTABLE}")
 message(STATUS "Python3 Include Directory: ${Python3_INCLUDE_DIRS}")

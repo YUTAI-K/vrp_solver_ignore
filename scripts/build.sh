@@ -29,6 +29,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     LIB_EXT=".dylib"
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     LIB_EXT=".so"
+elif [[ "$OSTYPE" == "msys"* ]]; then
+    LIB_EXT=".dll"
 else
     echo "Unsupported OS"
     exit 1
