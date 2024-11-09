@@ -72,6 +72,39 @@ jobs:
           ls -R
         shell: bash
 
+      # Build and Inspect Source Distribution
+      - name: Build Source Distribution
+        run: |
+          python setup.py sdist
+          echo "Listing contents of the source distribution:"
+          tar -tzf dist/vrp_solver_ignore-0.1.0.tar.gz
+        shell: bash
+
+      - name: Extract and List sdist Contents
+        run: |
+          mkdir sdist_contents
+          tar -xzf dist/vrp_solver_ignore-0.1.0.tar.gz -C sdist_contents
+          echo "Contents of sdist_contents:"
+          ls -R sdist_contents/vrp_solver_ignore-0.1.0/
+        shell: bash
+
+      - name: Verify CMakeLists.txt Presence
+        run: |
+          if [ -f sdist_contents/vrp_solver_ignore-0.1.0/cpp/CMakeLists.txt ]; then
+            echo "CMakeLists.txt found."
+          else
+            echo "CMakeLists.txt is missing!"
+            exit 1
+          fi
+        shell: bash
+
+      # Print scikit-build Configuration
+      - name: Print scikit-build Configuration
+        run: |
+          python -c "import skbuild; print(skbuild.__file__)"
+          python -c "import skbuild; print(dir(skbuild))"
+        shell: bash
+
       # Inspect the Extension Module (Only if Built)
       - name: Inspect Extension Module
         run: |
