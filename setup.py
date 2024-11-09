@@ -38,7 +38,7 @@ print(f"python_library_dir is {python_library_dir}")
 if current_platform == "Windows":
     libraries = ["boost_python3", "boost_graph"]  # Adjust based on your Boost Python version
 elif current_platform == "Darwin":
-    libraries = ["boost_python3", "boost_graph"]  # Adjust based on your Boost Python version
+    libraries = ["libboost_python312-mt.dylib", "libboost_graph-mt.dylib"]  # Adjust based on your Boost Python version
 else:
     libraries = ["boost_python3", "boost_graph"]  # Adjust based on your Boost Python version
 
