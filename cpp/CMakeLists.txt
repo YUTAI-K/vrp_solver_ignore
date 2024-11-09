@@ -35,7 +35,7 @@ target_include_directories(cppWrapper
 
 # Determine the shared library extension
 if(WIN32)
-    set(LIB_EXTENSION ".dll")
+    set(LIB_EXTENSION ".pyd")
 elseif(APPLE)
     set(LIB_EXTENSION ".so")
 else()

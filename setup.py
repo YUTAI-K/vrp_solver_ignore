@@ -10,7 +10,7 @@ import sys
 # Determine the shared library extension based on the operating system
 current_platform = platform.system()
 if current_platform == "Windows":
-    lib_ext = ".dll"
+    lib_ext = ".pyd"
 elif current_platform == "Darwin":
     lib_ext = ".so"  # Python expects .so on macOS
 else:

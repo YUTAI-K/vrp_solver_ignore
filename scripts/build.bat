@@ -14,7 +14,7 @@ REM Build the shared library
 cmake --build . --config Release
 
 REM Determine the shared library extension
-SET "LIB_EXT=.dll"
+SET "LIB_EXT=.pyd"
 
 REM Find the built shared library
 FOR %%f IN (cppWrapper*!LIB_EXT!) DO (
