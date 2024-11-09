@@ -33,7 +33,7 @@ if current_platform == "Darwin":
     boost_include_dir = "/opt/homebrew/Cellar/boost/1.86.0_2/include"
     boost_library_dir = "/opt/homebrew/Cellar/boost/1.86.0_2/lib"
     python_include_dir = "/Library/Frameworks/Python.framework/Versions/3.10/include/python3.10"
-    python_library_dir = "/Library/Frameworks/Python.framework/Versions/3.10/lib/libpython3.10.dylib"
+    python_library_dir = "/Library/Frameworks/Python.framework/Versions/3.10/lib/"
 
 print(f"boost_include_dir is {boost_include_dir}")
 print(f"boost_library_dir is {boost_library_dir}")
@@ -44,7 +44,7 @@ print(f"python_library_dir is {python_library_dir}")
 if current_platform == "Windows":
     libraries = ["boost_python3", "boost_graph"]  # Adjust based on your Boost Python version
 elif current_platform == "Darwin":
-    libraries = ["Boost::python", "Boost::graph", "Python3::Python", "Python3::Module"]  # Adjust based on your Boost Python version
+    libraries = ["libpython3.10.dylib", "Boost::graph", "Python3::Python", "Python3::Module"]  # Adjust based on your Boost Python version
 else:
     libraries = ["boost_python3", "boost_graph"]  # Adjust based on your Boost Python version
 
