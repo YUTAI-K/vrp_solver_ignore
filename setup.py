@@ -4,8 +4,8 @@ import os
 import sys
 
 # Helper function to get environment variables with a default value
-def get_env_var(var_name, default):
-    return os.environ.get(var_name, default)
+# def get_env_var(var_name, default):
+#     return os.environ.get(var_name, default)
 
 # Determine the shared library extension based on the operating system
 current_platform = platform.system()
@@ -25,10 +25,16 @@ if not os.path.isfile(cpp_wrapper_path):
     raise FileNotFoundError(f"{cpp_wrapper_path} not found. Please build the C++ extension before packaging.")
 
 # Dynamically resolve include directories and library directories using environment variables
-boost_include_dir = get_env_var("BOOST_INCLUDE_DIR", "/usr/local/include")
-boost_library_dir = get_env_var("BOOST_LIBRARY_DIR", "/usr/local/lib")
-python_include_dir = get_env_var("PYTHON_INCLUDE_DIR", sys.exec_prefix + "/include")
-python_library_dir = get_env_var("PYTHON_LIBRARY_DIR", sys.exec_prefix + "/libs")
+# boost_include_dir = get_env_var("BOOST_INCLUDE_DIR", "/usr/local/include")
+# boost_library_dir = get_env_var("BOOST_LIBRARY_DIR", "/usr/local/lib")
+# python_include_dir = get_env_var("PYTHON_INCLUDE_DIR", sys.exec_prefix + "/include")
+# python_library_dir = get_env_var("PYTHON_LIBRARY_DIR", sys.exec_prefix + "/libs")
+if current_platform == "Darwin":
+    boost_include_dir = "/opt/homebrew/Cellar/boost/1.86.0_2/include"
+    boost_library_dir = "/opt/homebrew/Cellar/boost/1.86.0_2/lib"
+    python_include_dir = "/Library/Frameworks/Python.framework/Versions/3.10/include/python3.10"
+    python_library_dir = "/Library/Frameworks/Python.framework/Versions/3.10/lib/libpython3.10.dylib"
+
 print(f"boost_include_dir is {boost_include_dir}")
 print(f"boost_library_dir is {boost_library_dir}")
 print(f"python_include_dir is {python_include_dir}")
@@ -38,7 +44,7 @@ print(f"python_library_dir is {python_library_dir}")
 if current_platform == "Windows":
     libraries = ["boost_python3", "boost_graph"]  # Adjust based on your Boost Python version
 elif current_platform == "Darwin":
-    libraries = ["libboost_python312-mt.dylib", "libboost_graph-mt.dylib"]  # Adjust based on your Boost Python version
+    libraries = ["Boost::python", "Boost::graph", "Python3::Python", "Python3::Module"]  # Adjust based on your Boost Python version
 else:
     libraries = ["boost_python3", "boost_graph"]  # Adjust based on your Boost Python version
 

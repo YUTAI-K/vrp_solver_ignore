@@ -78,31 +78,6 @@ jobs:
         shell: cmd
         if: matrix.os == 'windows-latest'
 
-      # Set environment variables based on OS
-      - name: Set environment variables (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          echo "BOOST_INCLUDE_DIR=/usr/include" >> $GITHUB_ENV
-          echo "BOOST_LIBRARY_DIR=/usr/lib" >> $GITHUB_ENV
-          echo "PYTHON_INCLUDE_DIR=$(python3.10 -c 'import sysconfig; print(sysconfig.get_paths()["include"])')" >> $GITHUB_ENV
-          echo "PYTHON_LIBRARY_DIR=$(python3.10 -c 'import sysconfig; print(sysconfig.get_config_var("LIBDIR"))')" >> $GITHUB_ENV
-
-      - name: Set environment variables (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          echo "BOOST_INCLUDE_DIR=/opt/homebrew/include" >> $GITHUB_ENV
-          echo "BOOST_LIBRARY_DIR=/opt/homebrew/lib" >> $GITHUB_ENV
-          echo "PYTHON_INCLUDE_DIR=/Library/Frameworks/Python.framework/Versions/3.10/include/python3.10" >> $GITHUB_ENV
-          echo "PYTHON_LIBRARY_DIR=/Library/Frameworks/Python.framework/Versions/3.10/lib" >> $GITHUB_ENV
-
-      - name: Set environment variables (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "BOOST_INCLUDE_DIR=C:\\tools\\boost\\include" >> $GITHUB_ENV
-          echo "BOOST_LIBRARY_DIR=C:\\tools\\boost\\lib" >> $GITHUB_ENV
-          echo "PYTHON_INCLUDE_DIR=C:\\Python310\\include" >> $GITHUB_ENV
-          echo "PYTHON_LIBRARY_DIR=C:\\Python310\\libs" >> $GITHUB_ENV
-
       # List Package Directory Contents
       - name: List Package Directory Contents
         run: |
@@ -111,26 +86,6 @@ jobs:
         shell: bash
         if: matrix.os != 'windows-latest'
 
-      # Archive and Upload Package Directory (Optional)
-      - name: Archive Package Directory
-        if: matrix.os != 'windows-latest'
-        run: |
-          tar -czvf package.tar.gz src/vrp_solver_ignore
-        shell: bash
-
-      - name: Upload Package Archive
-        if: matrix.os != 'windows-latest'
-        uses: actions/upload-artifact@v3
-        with:
-          name: package-archive-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: package.tar.gz
-
-      # Inspect setup.py
-      - name: Inspect setup.py
-        run: |
-          echo "Displaying setup.py content:"
-          cat setup.py
-        shell: bash
 
       # Validate setup.py Packaging
       - name: Validate setup.py Packaging

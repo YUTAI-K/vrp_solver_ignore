@@ -47,7 +47,6 @@ set_target_properties(cppWrapper PROPERTIES
     SUFFIX "${LIB_EXTENSION}"
 )
 
-
 set_target_properties(cppWrapper PROPERTIES PREFIX "") 
 
 message(STATUS "Python3 Interpreter: ${Python3_EXECUTABLE}")
@@ -57,3 +56,5 @@ message(STATUS "Python3 Development Include Directory: ${Python3_DEVELOPMENT_INC
 message(STATUS "Python3 Development Libraries: ${Python3_DEVELOPMENT_LIBRARIES}")
 message(STATUS "Boost Include Directory: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost Python Library: ${Boost_PYTHON_LIBRARY}")
+message(STATUS "PYTHON_LIBRARY_DIR: ${PYTHON_LIBRARY_DIR}")
+
