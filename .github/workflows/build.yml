@@ -35,11 +35,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libboost-python-dev libboost-graph-dev cmake
+          sudo apt-get install -y libboost-python-dev libboost-graph-dev cmake ninja-build
 
       - name: Install Boost and CMake (macOS)
         if: matrix.os == 'macos-latest'
-        run: brew install boost cmake python@3.10 boost-python3
+        run: |
+          brew install boost cmake python@3.10 boost-python3 ninja
 
       - name: Install Boost and CMake (Windows)
         if: matrix.os == 'windows-latest'
@@ -64,17 +65,14 @@ jobs:
           gcc --version
           g++ --version
 
-
-      # List Package Directory Contents
-      - name: List Package Directory Contents
+      # List All Files in the Repository for Debugging
+      - name: List All Files in Repository
         run: |
-          echo "Listing contents of the package directory:"
-          ls -R src/vrp_solver_ignore
+          echo "Listing all files in the repository:"
+          ls -R
         shell: bash
-        if: matrix.os != 'windows-latest'
 
-
-      # Inspect the Extension Module
+      # Inspect the Extension Module (Only if Built)
       - name: Inspect Extension Module
         run: |
           echo "Inspecting cppWrapper.so with otool:"
@@ -82,7 +80,7 @@ jobs:
         shell: bash
         if: matrix.os != 'windows-latest'
 
-      # Inspect the Shared Library Symbols
+      # Inspect the Shared Library Symbols (Only if Built)
       - name: Inspect Shared Library Symbols
         run: |
           echo "Inspecting symbols in cppWrapper.so:"
@@ -93,9 +91,9 @@ jobs:
       # Build wheels with maximum verbosity
       - name: Build wheels
         run: |
-          CIBW_BUILD_VERBOSITY=1 cibuildwheel --output-dir wheelhouse
+          CIBW_BUILD_VERBOSITY=2 cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 1  #
+          CIBW_BUILD_VERBOSITY: 2
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact

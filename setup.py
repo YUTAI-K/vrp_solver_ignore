@@ -18,6 +18,7 @@ setup(
     cmake_args=[
         f'-DPYTHON_EXECUTABLE={sys.executable}',
     ],
+    cmake_source_dir="cpp",  # Specify the CMake source directory
     install_requires=[
         "gurobipy>=9.0",
         "plotly>=5.0.0",

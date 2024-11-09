@@ -4,8 +4,6 @@ recursive-include src/vrp_solver_ignore *.py
 # Include C++ source and header files
 recursive-include cpp *.cpp *.h CMakeLists.txt *.cmake
 
-# Include any data files
-recursive-include src/vrp_solver_ignore/data *.json *.csv
 
 # Exclude build directories and temporary files
 global-exclude build/ *.tmp *.log *.swp *.DS_Store
