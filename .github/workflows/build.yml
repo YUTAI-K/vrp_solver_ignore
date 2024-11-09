@@ -15,7 +15,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os:
+          - ubuntu-22.04  # or ubuntu-20.04
+          - macos-14
+          - windows-2022
         python-version: ["3.10"]  # Adjust as needed
 
     steps:
@@ -32,22 +35,21 @@ jobs:
 
       # Install Boost and CMake
       - name: Install Boost and CMake (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libboost-python-dev libboost-graph-dev cmake ninja-build
+          sudo apt-get install -y libboost-python3.10-dev libboost-graph-dev cmake ninja-build
 
       - name: Install Boost and CMake (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-14'
         run: |
           brew install boost cmake python@3.10 boost-python3 ninja
 
       - name: Install Boost and CMake (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2022'
         run: |
           choco install boost-msvc
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-
       # Install GCC 13 on Linux
       - name: Install GCC 13 (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -65,65 +67,15 @@ jobs:
           gcc --version
           g++ --version
 
-      # List All Files in the Repository for Debugging
-      - name: List All Files in Repository
-        run: |
-          echo "Listing all files in the repository:"
-          ls -R
-        shell: bash
-
-      # Build Source Distribution
-      - name: Build Source Distribution
-        run: |
-          python setup.py sdist
-          echo "Listing contents of the source distribution:"
-          tar -tzf dist/vrp_solver_ignore-0.1.0.tar.gz
-        shell: bash
-
-      # Extract and List sdist Contents
-      - name: Extract and List sdist Contents
-        run: |
-          mkdir sdist_contents
-          tar -xzf dist/vrp_solver_ignore-0.1.0.tar.gz -C sdist_contents
-          echo "Contents of sdist_contents:"
-          ls -R sdist_contents/vrp_solver_ignore-0.1.0/
-        shell: bash
-
-      # Verify CMakeLists.txt Presence
-      - name: Verify CMakeLists.txt Presence
-        run: |
-          if [ -f sdist_contents/vrp_solver_ignore-0.1.0/cpp/CMakeLists.txt ]; then
-            echo "CMakeLists.txt found."
-          else
-            echo "CMakeLists.txt is missing!"
-            exit 1
-          fi
-        shell: bash
-
-      # Print scikit-build Configuration
-      - name: Print scikit-build Configuration
-        run: |
-          python -c "import skbuild; print(skbuild.__file__)"
-          python -c "import skbuild; print(dir(skbuild))"
-        shell: bash
-
-      # Debugging: Print CMAKE_OSX_DEPLOYMENT_TARGET
-      - name: Print CMAKE_OSX_DEPLOYMENT_TARGET
-        run: |
-          echo "CMAKE_OSX_DEPLOYMENT_TARGET is set to: $CMAKE_OSX_DEPLOYMENT_TARGET"
-          if [ -f _skbuild/macosx-13.0-arm64-3.10/cmake-build/CMakeCache.txt ]; then
-            grep CMAKE_OSX_DEPLOYMENT_TARGET _skbuild/macosx-13.0-arm64-3.10/cmake-build/CMakeCache.txt
-          fi
-        shell: bash
-        if: matrix.os == 'macos-latest'
-
-      # Build wheels with maximum verbosity and set CIBW_OSX_DEPLOYMENT_TARGET for macOS
+      # Build wheels with maximum verbosity and set deployment targets
       - name: Build wheels
         run: |
           cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 1
-          CIBW_OSX_DEPLOYMENT_TARGET: 13.0  # Set for macOS builds only
+          CIBW_BUILD_VERBOSITY: 0
+          CIBW_OSX_DEPLOYMENT_TARGET: 14.0  # Match the macOS version
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014  # For Linux builds
+          CIBW_SKIP: cp27-* cp35-*  # Skip unsupported Python versions
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact
@@ -134,7 +86,7 @@ jobs:
 
   test_wheels:
     needs: build_wheels
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: ["3.10"]
@@ -146,7 +98,7 @@ jobs:
       - name: Download wheels
         uses: actions/download-artifact@v3
         with:
-          name: wheels-ubuntu-latest-py*
+          name: wheels-ubuntu-22.04-py*
           path: wheelhouse
 
       - name: Set up Python
@@ -165,7 +117,7 @@ jobs:
 
   publish_wheels:
     needs: build_wheels
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event_name == 'release'
     steps:
       - name: Checkout code
