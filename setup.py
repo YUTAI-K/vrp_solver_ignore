@@ -3,10 +3,6 @@ import platform
 import os
 import sys
 
-# Helper function to get environment variables with a default value
-# def get_env_var(var_name, default):
-#     return os.environ.get(var_name, default)
-
 # Determine the shared library extension based on the operating system
 current_platform = platform.system()
 if current_platform == "Windows":
@@ -25,10 +21,6 @@ if not os.path.isfile(cpp_wrapper_path):
     raise FileNotFoundError(f"{cpp_wrapper_path} not found. Please build the C++ extension before packaging.")
 
 # Dynamically resolve include directories and library directories using environment variables
-# boost_include_dir = get_env_var("BOOST_INCLUDE_DIR", "/usr/local/include")
-# boost_library_dir = get_env_var("BOOST_LIBRARY_DIR", "/usr/local/lib")
-# python_include_dir = get_env_var("PYTHON_INCLUDE_DIR", sys.exec_prefix + "/include")
-# python_library_dir = get_env_var("PYTHON_LIBRARY_DIR", sys.exec_prefix + "/libs")
 if current_platform == "Darwin":
     boost_include_dir = "/opt/homebrew/Cellar/boost/1.86.0_2/include"
     boost_library_dir = "/opt/homebrew/Cellar/boost/1.86.0_2/lib"
@@ -52,9 +44,9 @@ else:
 cpp_extension = Extension(
     name="vrp_solver_ignore.cppWrapper",
     sources=[],  # Empty since we're providing a pre-built .so/.pyd
-    include_dirs=[boost_include_dir, python_include_dir],
-    library_dirs=[boost_library_dir, python_library_dir],
-    libraries=libraries,
+    # include_dirs=[boost_include_dir, python_include_dir],
+    # library_dirs=[boost_library_dir, python_library_dir],
+    # libraries=libraries,
     language="c++",
     extra_compile_args=["-std=c++23"],  # Ensure C++23 standard
 )
