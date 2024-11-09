@@ -13,7 +13,7 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     package_data={
-        "vrp_solver_ignore": ["data/*.json", "data/*.csv"],  # Include data files
+        "vrp_solver_ignore": ["data/*.json", "data/*.csv"],  # Adjust if you have data files
     },
     cmake_args=[
         f'-DPYTHON_EXECUTABLE={sys.executable}',
