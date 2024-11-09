@@ -38,7 +38,7 @@ jobs:
         if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libboost-python3.10-dev libboost-graph-dev cmake ninja-build
+          sudo apt-get install -y libboost-python-dev libboost-graph-dev cmake ninja-build
 
       - name: Install Boost and CMake (macOS)
         if: matrix.os == 'macos-14'
