@@ -113,7 +113,7 @@ jobs:
           cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD_VERBOSITY: 0
-          MACOSX_DEPLOYMENT_TARGET: 14.0  # Set for macOS builds only
+
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact

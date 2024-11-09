@@ -1,6 +1,17 @@
 from skbuild import setup
 from setuptools import find_packages
 import sys
+import platform
+
+# Determine if the build is on macOS
+is_macos = platform.system() == "Darwin"
+
+# Initialize cmake_args with the Python executable
+cmake_args = [f'-DPYTHON_EXECUTABLE={sys.executable}']
+
+# If building on macOS, set the deployment target to 14.0
+if is_macos:
+    cmake_args.append('-DCMAKE_OSX_DEPLOYMENT_TARGET=14.0')
 
 setup(
     name="vrp_solver_ignore",
@@ -15,10 +26,8 @@ setup(
     package_data={
         "vrp_solver_ignore": ["data/*.json", "data/*.csv"],  # Adjust if you have data files
     },
-    cmake_args=[
-        f'-DPYTHON_EXECUTABLE={sys.executable}',
-    ],
-    cmake_source_dir="cpp",  # Specify the CMake source directory
+    cmake_args=cmake_args,  # Pass the cmake arguments
+    cmake_source_dir="cpp",  # Specifies the CMake source directory
     install_requires=[
         "gurobipy>=9.0",
         "plotly>=5.0.0",
