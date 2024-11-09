@@ -9,9 +9,9 @@ is_macos = platform.system() == "Darwin"
 # Initialize cmake_args with the Python executable
 cmake_args = [f'-DPYTHON_EXECUTABLE={sys.executable}']
 
-# If building on macOS, set the deployment target to 14.0
+# If building on macOS, set the deployment target to 13.0
 if is_macos:
-    cmake_args.append('-DCMAKE_OSX_DEPLOYMENT_TARGET=14.0')
+    cmake_args.append('-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0')
 
 setup(
     name="vrp_solver_ignore",

@@ -107,13 +107,23 @@ jobs:
           python -c "import skbuild; print(dir(skbuild))"
         shell: bash
 
-      # Build wheels with maximum verbosity and set MACOSX_DEPLOYMENT_TARGET for macOS
+      # Debugging: Print CMAKE_OSX_DEPLOYMENT_TARGET
+      - name: Print CMAKE_OSX_DEPLOYMENT_TARGET
+        run: |
+          echo "CMAKE_OSX_DEPLOYMENT_TARGET is set to: $CMAKE_OSX_DEPLOYMENT_TARGET"
+          if [ -f _skbuild/macosx-13.0-arm64-3.10/cmake-build/CMakeCache.txt ]; then
+            grep CMAKE_OSX_DEPLOYMENT_TARGET _skbuild/macosx-13.0-arm64-3.10/cmake-build/CMakeCache.txt
+          fi
+        shell: bash
+        if: matrix.os == 'macos-latest'
+
+      # Build wheels with maximum verbosity and set CIBW_OSX_DEPLOYMENT_TARGET for macOS
       - name: Build wheels
         run: |
           cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 0
-
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_OSX_DEPLOYMENT_TARGET: 13.0  # Set for macOS builds only
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact
