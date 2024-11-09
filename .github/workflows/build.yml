@@ -72,7 +72,7 @@ jobs:
           ls -R
         shell: bash
 
-      # Build and Inspect Source Distribution
+      # Build Source Distribution
       - name: Build Source Distribution
         run: |
           python setup.py sdist
@@ -80,6 +80,7 @@ jobs:
           tar -tzf dist/vrp_solver_ignore-0.1.0.tar.gz
         shell: bash
 
+      # Extract and List sdist Contents
       - name: Extract and List sdist Contents
         run: |
           mkdir sdist_contents
@@ -88,6 +89,7 @@ jobs:
           ls -R sdist_contents/vrp_solver_ignore-0.1.0/
         shell: bash
 
+      # Verify CMakeLists.txt Presence
       - name: Verify CMakeLists.txt Presence
         run: |
           if [ -f sdist_contents/vrp_solver_ignore-0.1.0/cpp/CMakeLists.txt ]; then
@@ -105,28 +107,13 @@ jobs:
           python -c "import skbuild; print(dir(skbuild))"
         shell: bash
 
-      # Inspect the Extension Module (Only if Built)
-      - name: Inspect Extension Module
-        run: |
-          echo "Inspecting cppWrapper.so with otool:"
-          otool -L src/vrp_solver_ignore/cppWrapper.so || echo "otool not found or cppWrapper.so missing."
-        shell: bash
-        if: matrix.os != 'windows-latest'
-
-      # Inspect the Shared Library Symbols (Only if Built)
-      - name: Inspect Shared Library Symbols
-        run: |
-          echo "Inspecting symbols in cppWrapper.so:"
-          nm src/vrp_solver_ignore/cppWrapper.so | grep PYBIND11_MODULE || echo "No PYBIND11_MODULE found."
-        shell: bash
-        if: matrix.os != 'windows-latest'
-
-      # Build wheels with maximum verbosity
+      # Build wheels with maximum verbosity and set MACOSX_DEPLOYMENT_TARGET for macOS
       - name: Build wheels
         run: |
-          CIBW_BUILD_VERBOSITY=0 cibuildwheel --output-dir wheelhouse
+          cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD_VERBOSITY: 0
+          MACOSX_DEPLOYMENT_TARGET: 14.0  # Set for macOS builds only
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact
