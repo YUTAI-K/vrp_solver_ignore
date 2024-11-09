@@ -27,8 +27,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install cibuildwheel
-        run: pip install cibuildwheel
+      - name: Install cibuildwheel and scikit-build
+        run: pip install cibuildwheel scikit-build
 
       # Install Boost and CMake
       - name: Install Boost and CMake (Linux)
@@ -64,19 +64,6 @@ jobs:
           gcc --version
           g++ --version
 
-      # Build C++ extension (Linux/macOS)
-      - name: Build C++ extension (Linux/macOS)
-        run: |
-          chmod +x scripts/build.sh
-          ./scripts/build.sh
-        shell: bash
-        if: matrix.os != 'windows-latest'
-
-      # Build C++ extension (Windows)
-      - name: Build C++ extension (Windows)
-        run: scripts\build.bat
-        shell: cmd
-        if: matrix.os == 'windows-latest'
 
       # List Package Directory Contents
       - name: List Package Directory Contents
@@ -86,12 +73,6 @@ jobs:
         shell: bash
         if: matrix.os != 'windows-latest'
 
-
-      # Validate setup.py Packaging
-      - name: Validate setup.py Packaging
-        run: |
-          python setup.py check --metadata --restructuredtext
-        shell: bash
 
       # Inspect the Extension Module
       - name: Inspect Extension Module
