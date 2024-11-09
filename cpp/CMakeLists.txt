@@ -50,6 +50,12 @@ set_target_properties(cppWrapper PROPERTIES
 
 set_target_properties(cppWrapper PROPERTIES PREFIX "") 
 
+install(TARGETS cppWrapper
+    LIBRARY DESTINATION .
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+
 message(STATUS "Python3 Interpreter: ${Python3_EXECUTABLE}")
 message(STATUS "Python3 Include Directory: ${Python3_INCLUDE_DIRS}")
 message(STATUS "Python3 Libraries: ${Python3_LIBRARIES}")
