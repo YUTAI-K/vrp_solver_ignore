@@ -5,7 +5,7 @@ import sys
 setup(
     name="vrp_solver_ignore",
     version="0.1.0",
-    description="A Vehicle Routing Problem solver with custom strategy, please visit the GitHub page for details.",
+    description="A Vehicle Routing Problem solver with custom strategy.",
     author="Yutai Ke",
     author_email="yutai.ke@bse.eu",
     url="https://github.com/YUTAI-K/vrp_solver_ignore",
@@ -13,11 +13,10 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     package_data={
-        "vrp_solver_ignore": ["cppWrapper.so", "cppWrapper.pyd"]  # Adjust based on OS
+        "vrp_solver_ignore": ["data/*.json", "data/*.csv"],  # Include data files
     },
     cmake_args=[
-        '-DCMAKE_BUILD_TYPE=Release',
-        '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
+        f'-DPYTHON_EXECUTABLE={sys.executable}',
     ],
     install_requires=[
         "gurobipy>=9.0",
