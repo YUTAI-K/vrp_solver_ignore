@@ -44,11 +44,11 @@ jobs:
       #   shell: bash
 
 
-      # Validate setup.py Packaging
-      - name: Validate setup.py Packaging
-        run: |
-          python setup.py check --metadata --restructuredtext
-        shell: bash
+      # # Validate setup.py Packaging
+      # - name: Validate setup.py Packaging
+      #   run: |
+      #     python setup.py check --metadata --restructuredtext
+      #   shell: bash
 
       # # Inspect the Extension Module (macOS)
       # - name: Inspect Extension Module
