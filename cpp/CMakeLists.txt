@@ -12,7 +12,7 @@ add_library(cppWrapper SHARED
 )
 
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED )
+find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED )
 find_package(Boost REQUIRED COMPONENTS python)
 find_package(Boost REQUIRED COMPONENTS graph) # Find Boost graph component
 
