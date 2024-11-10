@@ -2,6 +2,15 @@
 set -e
 set -x  # Enable verbose logging for debugging
 
+
+# Get the Python executable path and version
+PYTHON_EXECUTABLE=$(which python)
+PYTHON_VERSION=$($PYTHON_EXECUTABLE -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+PYTHON_INCLUDE_DIR=$($PYTHON_EXECUTABLE -c "from sysconfig import get_paths; print(get_paths()['include'])")
+PYTHON_LIBRARY=$($PYTHON_EXECUTABLE -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+
+
+
 # Navigate to the C++ directory
 cd cpp
 
@@ -30,7 +39,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     LIB_EXT=".so"
 elif [[ "$OSTYPE" == "msys"* ]]; then
-    LIB_EXT=".dll"
+    LIB_EXT=".pyd"
 else
     echo "Unsupported OS"
     exit 1

@@ -87,35 +87,38 @@ jobs:
         run: echo 'MACOSX_DEPLOYMENT_TARGET=14.0' >> $GITHUB_ENV
 
       # Build wheels with maximum verbosity
-      - name: Build wheels
+      - name: Build wheels with cibuildwheel
         run: |
           cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 0
-          # Build the C++ extension inside the Docker container on Linux
+          CIBW_BUILD_VERBOSITY: 1
           CIBW_BEFORE_BUILD_LINUX: |
             # Install build tools and dependencies
             yum install -y bzip2-devel zlib-devel xz-devel make gcc gcc-c++ wget
-
-            # Get the Python executable path
-            PYTHON=$(which python)
-            # Get Python version
-            PYTHON_VERSION=$($PYTHON -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
             # Build Boost from source
             wget -O boost.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz
             tar -xzf boost.tar.gz
             cd boost_1_82_0
-            ./bootstrap.sh --with-libraries=python,graph --with-python=$PYTHON
-            ./b2 install --prefix=/usr/local --with-python --with-graph link=shared python=$PYTHON_VERSION
+            ./bootstrap.sh --with-libraries=python,graph --with-python=python3
+            ./b2 install --prefix=/usr/local --with-python --with-graph link=shared
             cd ..
 
             # Ensure the Boost libraries are found
             export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 
+            # Set environment variables for CMake to find Python 3
+            export Python3_ROOT_DIR=$(python -c "import sys; print(sys.prefix)")
+            export Python3_EXECUTABLE=$(which python)
+            export Python3_INCLUDE_DIR=$(python -c "from sysconfig import get_paths; print(get_paths()['include'])")
+            export Python3_LIBRARY=$(python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR') + '/libpython' + sysconfig.get_config_var('LDVERSION') + '.so')")
+
+            export CMAKE_PREFIX_PATH="$Python3_ROOT_DIR:$CMAKE_PREFIX_PATH"
+
             # Build your C++ extension
             chmod +x scripts/build.sh
             ./scripts/build.sh
+
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact
