@@ -1,0 +1,2 @@
+include src/vrp_solver_ignore/*.so
+include src/vrp_solver_ignore/*.pyd
