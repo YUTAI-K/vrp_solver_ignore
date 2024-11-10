@@ -49,6 +49,13 @@ set_target_properties(cppWrapper PROPERTIES
 
 set_target_properties(cppWrapper PROPERTIES PREFIX "") 
 
+# Define the install destination within your package
+set(PACKAGE_DIR "vrp_solver_ignore")
+
+# Install the built module into 'vrp_solver_ignore' directory
+install(TARGETS cppWrapper
+        LIBRARY DESTINATION ${PACKAGE_DIR}
+        COMPONENT cppWrapper)
 
 message(STATUS "Python3 Interpreter: ${Python3_EXECUTABLE}")
 message(STATUS "Python3 Include Directory: ${Python3_INCLUDE_DIRS}")
