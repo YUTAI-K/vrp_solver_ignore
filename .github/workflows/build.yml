@@ -111,6 +111,12 @@ jobs:
         shell: bash
         if: matrix.os != 'windows-latest'
 
+      # Try to solve the problem of MACos compitability
+      - name: Set MACOSX_DEPLOYMENT_TARGET
+        if: matrix.os == 'macos-latest'
+        run: echo 'MACOSX_DEPLOYMENT_TARGET=14.0' >> $GITHUB_ENV
+
+
       # Build wheels with maximum verbosity
       - name: Build wheels
         run: |
