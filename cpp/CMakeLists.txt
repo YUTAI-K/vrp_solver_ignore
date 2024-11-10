@@ -3,14 +3,18 @@ project(cppWrapper)
 set(CMAKE_CXX_STANDARD 23)
 cmake_policy(SET CMP0167 OLD)          # Prefer FindBoost over BoostConfig
 # Add the Python module
-add_library(cppWrapper SHARED
+add_library(cppWrapper MODULE
         src/library.cpp
         src/ElementaryLabel.cpp
         src/Graph.cpp
         src/Route.cpp
         src/ShortestPath.cpp
 )
-
+if(APPLE)
+    set_target_properties(cppWrapper PROPERTIES
+        LINK_FLAGS "-undefined dynamic_lookup"
+    )
+endif()
 
 find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED )
 find_package(Boost REQUIRED COMPONENTS python)
