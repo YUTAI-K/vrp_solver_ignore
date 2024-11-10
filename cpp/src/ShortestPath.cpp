@@ -59,8 +59,10 @@ std::vector<Route> ShortestPathSolver::solve_ignoring_shortest_path(const std::m
     static constexpr auto EPS = 0.001;
     std::vector<std::vector<BoostArc>> edges_to_return{};
     std::vector<ElementaryLabel> labels_to_return{};
-    for (auto [eds, lbl]: std::views::zip(opt_path_edges, opt_path_labels))
+    for (size_t i = 0; i < opt_path_edges.size(); ++i)
     {
+        auto eds = opt_path_edges[i];
+        auto lbl = opt_path_labels[i];
         if (lbl.cost > -EPS)
             continue;
         auto isLooping = check_existence_of_loops(eds, lbl);
@@ -394,8 +396,11 @@ std::vector<Route> ShortestPathSolver::solve_ignoring_incremental_shortest_path(
         static constexpr auto EPS = 0.001;
         std::vector<std::vector<BoostArc>> edges_to_return{};
         std::vector<ElementaryLabel> labels_to_return{};
-        for (auto [eds, lbl]: std::views::zip(opt_path_edges, opt_path_labels))
+        for (size_t i = 0; i < opt_path_edges.size(); ++i)
         {// FOr all edges, if it has a negative cost and is not looping, we want to return such thing
+            auto eds = opt_path_edges[i];
+            auto lbl = opt_path_labels[i];
+            
             if (lbl.cost > - EPS)
                 continue;
             auto isLooping = check_existence_of_loops(eds, lbl);
@@ -518,8 +523,11 @@ std::vector<Route> ShortestPathSolver::solve_ignoring_incremental_multiplicity_s
         static constexpr auto EPS = 0.001;
         std::vector<std::vector<BoostArc>> edges_to_return{};
         std::vector<ElementaryLabel> labels_to_return{};
-        for (auto [eds, lbl]: std::views::zip(opt_path_edges, opt_path_labels))
+        for (size_t i = 0; i < opt_path_edges.size(); ++i)
         {
+
+            auto eds = opt_path_edges[i];
+            auto lbl = opt_path_labels[i];
             if (lbl.cost > -EPS)
                 continue;
             auto isLooping = check_existence_of_loops(eds, lbl);
@@ -575,7 +583,9 @@ std::vector<Route> ShortestPathSolver::routes_from_paths(
     assert(edges.size() == labels.size());
 
     // zip_view is a range adaptor that takes one or more views, and produces a view whose ith element is a tuple-like value consisting of the ith elements of all views. The size of produced view is the minimum of sizes of all adapted views.
-    for(const auto& [eds, lbl] : std::views::zip(edges, labels)) {
+    for(size_t i = 0; i < edges.size(); ++i) {
+        const auto& eds = edges[i];
+        const auto& lbl = labels[i];
         assert(boost::target(eds.front(), g.g) == g.returning_depot());
         assert(boost::source(eds.back(), g.g) == g.departing_depot());
 
@@ -619,7 +629,9 @@ std::vector<Route> ShortestPathSolver::routes_from_paths_only_biggest(
     // Now proceed with the zip and processing
     int limit {k};
     int idx{0};
-    for (const auto& [eds, lbl] : std::views::zip(edge_label_pairs.first, edge_label_pairs.second)) {
+    for (size_t i = 0; i < edge_label_pairs.first.size(); ++i) {
+        const auto& eds = edge_label_pairs.first[i];
+        const auto& lbl = edge_label_pairs.second[i];
         if(lbl.cost > -EPS) { // Filter to include only negative costs
             break; // If the cost is already bigger than 0, then all following labels will all be bigger than 0
         }
@@ -702,8 +714,10 @@ std::set<size_t> ShortestPathSolver::check_negative_loops_and_multiplicity(
 {
     std::set<size_t> duplicates;
     std::map<size_t, int> multiplicity_map;
-    for (const auto& [eds, lbl] : std::views::zip(edges, labels))
+    for (size_t i = 0; i < edges.size(); ++i)
     {
+        const auto& eds = edges[i];
+        const auto& lbl = labels[i];
         const auto vertices_dups = check_negative_loops_in_one_path(eds, lbl);
         for(auto vertex: vertices_dups)
         {
@@ -736,8 +750,10 @@ std::set<size_t> ShortestPathSolver::check_negative_loops( // This function only
 {
     std::set<size_t> duplicates;
 
-    for (const auto& [eds, lbl] : std::views::zip(edges, labels))
+    for (size_t i = 0; i < edges.size(); ++i)
     {
+        const auto& eds = edges[i];
+        const auto& lbl = labels[i];
         const auto path_dups = check_negative_loops_in_one_path(eds, lbl);
         duplicates.insert(path_dups.begin(), path_dups.end());
     }
