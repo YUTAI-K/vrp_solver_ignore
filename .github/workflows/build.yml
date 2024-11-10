@@ -97,20 +97,7 @@ jobs:
             # Install build tools and dependencies
             yum install -y bzip2-devel zlib-devel xz-devel make gcc gcc-c++ wget
 
-            # Install GCC 11
-            yum install -y gcc-toolset-11
-
-            # Enable GCC 11
-            source /opt/rh/gcc-toolset-11/enable
-
-            # Verify GCC version
-            gcc --version
-
-            # Set compilers
-            export CC=/opt/rh/gcc-toolset-11/root/usr/bin/gcc
-            export CXX=/opt/rh/gcc-toolset-11/root/usr/bin/g++
-
-            # Build Boost from source using the new compiler
+            # Build Boost from source
             wget -O boost.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz
             tar -xzf boost.tar.gz
             cd boost_1_82_0
