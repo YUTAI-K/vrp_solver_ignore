@@ -14,54 +14,35 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10"]  # Adjust as needed
+        # python-version: ["3.10"]  # Adjust as needed
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+      # - name: Set up Python
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
 
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
-      # Install Boost and CMake (macOS)
-      - name: Install Boost and CMake (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install boost cmake python@3.10 boost-python3
-
-      # # Install Boost and CMake (Windows)
-      # - name: Install Boost and CMake (Windows)
-      #   if: matrix.os == 'windows-latest'
+      # # Install Boost and CMake (macOS)
+      # - name: Install Boost and CMake (macOS)
+      #   if: matrix.os == 'macos-latest'
       #   run: |
-      #     choco install -y boost-msvc-14.2 --version 1.74.0
-      #     choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+      #     brew install boost cmake python@3.10 boost-python3
 
-      # Build C++ extension (macOS)
-      - name: Build C++ extension (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          chmod +x scripts/build.sh
-          ./scripts/build.sh
-        shell: bash
 
-      # # Build C++ extension (Windows)
-      # - name: Build C++ extension (Windows)
-      #   if: matrix.os == 'windows-latest'
-      #   run: scripts\build.bat
-      #   shell: cmd
+      # # Build C++ extension (macOS)
+      # - name: Build C++ extension (macOS)
+      #   if: matrix.os == 'macos-latest'
+      #   run: |
+      #     chmod +x scripts/build.sh
+      #     ./scripts/build.sh
+      #   shell: bash
 
-      # List Package Directory Contents (macOS/Windows)
-      - name: List Package Directory Contents
-        if: matrix.os != 'ubuntu-latest'
-        run: |
-          echo "Listing contents of the package directory:"
-          ls -R src/vrp_solver_ignore
-        shell: bash
 
       # Validate setup.py Packaging
       - name: Validate setup.py Packaging
@@ -69,13 +50,13 @@ jobs:
           python setup.py check --metadata --restructuredtext
         shell: bash
 
-      # Inspect the Extension Module (macOS)
-      - name: Inspect Extension Module
-        if: matrix.os == 'macos-latest'
-        run: |
-          echo "Inspecting cppWrapper.so with otool:"
-          otool -L src/vrp_solver_ignore/cppWrapper.so || echo "otool not found or cppWrapper.so missing."
-        shell: bash
+      # # Inspect the Extension Module (macOS)
+      # - name: Inspect Extension Module
+      #   if: matrix.os == 'macos-latest'
+      #   run: |
+      #     echo "Inspecting cppWrapper.so with otool:"
+      #     otool -L src/vrp_solver_ignore/cppWrapper.so || echo "otool not found or cppWrapper.so missing."
+      #   shell: bash
 
       # Set MACOSX_DEPLOYMENT_TARGET (macOS)
       - name: Set MACOSX_DEPLOYMENT_TARGET
@@ -87,7 +68,7 @@ jobs:
         run: |
           cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BUILD_VERBOSITY: 0
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_BEFORE_BUILD_LINUX: |
             # Install build tools and dependencies
@@ -129,6 +110,19 @@ jobs:
 
             
             scripts\build.bat
+          CIBW_BEFORE_BUILD_MACOS: |
+            # Install dependencies
+            brew install boost cmake boost-python3
+
+            # Set environment variables for Python
+            export Python3_ROOT_DIR=$(python3 -c "import sys; print(sys.prefix)")
+            export Python3_EXECUTABLE=$(which python3)
+            export Python3_INCLUDE_DIR=$(python3 -c "from sysconfig import get_paths; print(get_paths()['include'])")
+            export Python3_LIBRARY=$(python3-config --prefix)/Python
+
+            # Build your C++ extension
+            chmod +x scripts/build.sh
+            ./scripts/build.sh
 
 
       # Upload wheels as artifact
@@ -163,13 +157,13 @@ jobs:
 
       - name: Install wheel
         run: |
-          pip install wheelhouse/*.whl
+          pip install --no-index --find-links wheelhouse vrp_solver_ignore
         shell: bash
         if: runner.os != 'Windows'
 
       - name: Install wheel (Windows)
         run: |
-          pip install wheelhouse\*.whl
+          pip install --no-index --find-links wheelhouse vrp_solver_ignore
         shell: cmd
         if: runner.os == 'Windows'
 
