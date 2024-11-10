@@ -28,7 +28,7 @@ else
 fi
 
 # Configure CMake with Boost paths
-cmake .. -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=$BOOST_ROOT -DBOOST_LIBRARYDIR=$BOOST_LIBRARYDIR -DCMAKE_CXX_FLAGS="--std=c++2b"
+cmake .. -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=$BOOST_ROOT -DBOOST_LIBRARYDIR=$BOOST_LIBRARYDIR 
 
 # Build the shared library
 cmake --build . --config Release
