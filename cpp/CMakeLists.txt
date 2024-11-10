@@ -16,7 +16,11 @@ if(APPLE)
     )
 endif()
 
-find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED )
+if(APPLE)
+    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+else()
+    find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED )
+endif()
 find_package(Boost REQUIRED COMPONENTS python)
 find_package(Boost REQUIRED COMPONENTS graph) # Find Boost graph component
 
