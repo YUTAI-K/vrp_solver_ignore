@@ -143,7 +143,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10"]
+        python-version: ["3.10", "3.11", "3.12"]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -163,13 +163,13 @@ jobs:
 
       - name: Install wheel
         run: |
-          pip install wheelhouse/*.whl
+          pip install --no-index --find-links wheelhouse vrp_solver_ignore
         shell: bash
         if: runner.os != 'Windows'
 
       - name: Install wheel (Windows)
         run: |
-          pip install wheelhouse\*.whl
+          pip install --no-index --find-links wheelhouse vrp_solver_ignore
         shell: cmd
         if: runner.os == 'Windows'
 
