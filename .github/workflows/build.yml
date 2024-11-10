@@ -92,9 +92,23 @@ jobs:
           cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD_VERBOSITY: 1
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_31
           CIBW_BEFORE_BUILD_LINUX: |
             # Install build tools and dependencies
-            yum install -y bzip2-devel zlib-devel xz-devel make gcc gcc-c++ wget
+            dnf install -y bzip2-devel zlib-devel xz-devel make gcc gcc-c++ wget
+
+            # Install GCC 13
+            dnf install -y gcc-toolset-13
+
+            # Enable GCC 13
+            source /opt/rh/gcc-toolset-13/enable
+
+            # Set compilers
+            export CC=/opt/rh/gcc-toolset-13/root/usr/bin/gcc
+            export CXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
+            
+            # Verify GCC version
+            gcc --version
 
             # Build Boost from source
             wget -O boost.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz
