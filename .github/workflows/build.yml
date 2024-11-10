@@ -2,13 +2,9 @@ name: Build, Test, and Publish Wheels
 
 on:
   push:
-    branches:
-      - main
-      - withoutScikit
+    branches: [ '**' ]
   pull_request:
-    branches:
-      - main
-      - withoutScikit
+    branches: [ '**' ]
   release:
     types: [published]
 
