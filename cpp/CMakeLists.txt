@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(cppWrapper)
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-cmake_policy(SET CMP0167 OLD)          # Prefer FindBoost over BoostConfig
+
 # Add the Python module
 add_library(cppWrapper SHARED
         src/library.cpp
@@ -50,11 +49,6 @@ set_target_properties(cppWrapper PROPERTIES
 
 set_target_properties(cppWrapper PROPERTIES PREFIX "") 
 
-install(TARGETS cppWrapper
-    LIBRARY DESTINATION .
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-)
 
 message(STATUS "Python3 Interpreter: ${Python3_EXECUTABLE}")
 message(STATUS "Python3 Include Directory: ${Python3_INCLUDE_DIRS}")

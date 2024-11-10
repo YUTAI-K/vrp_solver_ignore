@@ -28,6 +28,7 @@ setup(
     },
     cmake_args=cmake_args,  # Pass the cmake arguments
     cmake_source_dir="cpp",  # Specifies the CMake source directory
+    cmake_install_dir='src/vrp_solver_ignore',
     install_requires=[
         "gurobipy>=9.0",
         "plotly>=5.0.0",
