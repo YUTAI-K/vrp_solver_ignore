@@ -34,12 +34,6 @@ jobs:
         run: |
           brew install boost cmake python@3.10 boost-python3
 
-      # # Install Boost and CMake (Windows)
-      # - name: Install Boost and CMake (Windows)
-      #   if: matrix.os == 'windows-latest'
-      #   run: |
-      #     choco install -y boost-msvc-14.2 --version 1.74.0
-      #     choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
 
       # Build C++ extension (macOS)
       - name: Build C++ extension (macOS)
@@ -49,11 +43,6 @@ jobs:
           ./scripts/build.sh
         shell: bash
 
-      # # Build C++ extension (Windows)
-      # - name: Build C++ extension (Windows)
-      #   if: matrix.os == 'windows-latest'
-      #   run: scripts\build.bat
-      #   shell: cmd
 
       # List Package Directory Contents (macOS/Windows)
       - name: List Package Directory Contents
@@ -133,73 +122,44 @@ jobs:
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}
           path: wheelhouse/*.whl
 
-  # test_wheels:
-  #   needs: build_wheels
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest, macos-latest, windows-latest]
-  #       python-version: ["3.10", "3.11", "3.12"]
-  #   runs-on: ${{ matrix.os }}
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
-
-  #     - name: Download wheels
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         name: wheels-${{ matrix.os }}
-  #         path: wheelhouse
-
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-
-  #     - name: Install wheel
-  #       run: |
-  #         pip install --no-index --find-links wheelhouse vrp_solver_ignore
-  #       shell: bash
-  #       if: runner.os != 'Windows'
-
-  #     - name: Install wheel (Windows)
-  #       run: |
-  #         pip install --no-index --find-links wheelhouse vrp_solver_ignore
-  #       shell: cmd
-  #       if: runner.os == 'Windows'
-
-  #     - name: Install test dependencies
-  #       run: pip install -r requirements.txt
-
-  #     # Run tests
-  #     - name: Run tests
-  #       run: pytest tests/
-  #       shell: bash
-  #       if: runner.os != 'Windows'
-
-  #     - name: Run tests (Windows)
-  #       run: pytest tests
-  #       shell: cmd
-  #       if: runner.os == 'Windows'
-
+  
   publish_wheels:
     needs: build_wheels
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Download wheels
+      - name: Download wheels (Ubuntu)
+        uses: actions/download-artifact@v4  # Updated to v4
+        with:
+          name: wheels-ubuntu-latest
+          path: wheels_ubuntu
+
+      - name: Download wheels (macOS)
         uses: actions/download-artifact@v4
         with:
-          name: wheels-*
-          path: wheelhouse
+          name: wheels-macos-latest
+          path: wheels_macos
+
+      - name: Download wheels (Windows)
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-windows-latest
+          path: wheels_windows
+
+      - name: Collect wheels
+        run: |
+          mkdir -p wheelhouse
+          cp wheels_ubuntu/**/*.whl wheelhouse/ || true
+          cp wheels_macos/**/*.whl wheelhouse/ || true
+          cp wheels_windows/**/*.whl wheelhouse/ || true
 
       - name: Install twine
         run: pip install twine
