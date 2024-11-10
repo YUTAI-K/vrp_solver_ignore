@@ -53,11 +53,11 @@ jobs:
           ./scripts/build.sh
         shell: bash
 
-      # Build C++ extension (Windows)
-      - name: Build C++ extension (Windows)
-        if: matrix.os == 'windows-latest'
-        run: scripts\build.bat
-        shell: cmd
+      # # Build C++ extension (Windows)
+      # - name: Build C++ extension (Windows)
+      #   if: matrix.os == 'windows-latest'
+      #   run: scripts\build.bat
+      #   shell: cmd
 
       # List Package Directory Contents (macOS/Windows)
       - name: List Package Directory Contents
@@ -119,6 +119,20 @@ jobs:
             # Build your C++ extension
             chmod +x scripts/build.sh
             ./scripts/build.sh
+          CIBW_BEFORE_BUILD_WINDOWS: |
+            # Install CMake via Chocolatey
+            choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+
+            # Install Boost.Python via vcpkg
+            git clone https://github.com/microsoft/vcpkg.git
+            .\vcpkg\bootstrap-vcpkg.bat
+            .\vcpkg\vcpkg.exe install boost-python3:x64-windows
+
+            # Set VCPKG_ROOT environment variable
+            set VCPKG_ROOT=%CD%\vcpkg
+
+            # Build your C++ extension
+            scripts\build.bat
 
 
       # Upload wheels as artifact
