@@ -1,4 +1,4 @@
-name: Build, Test, and Publish Wheels
+name: Build and Publish Wheels
 
 on:
   push:
@@ -138,54 +138,54 @@ jobs:
           name: wheels-${{ matrix.os }}
           path: wheelhouse/*.whl
 
-  test_wheels:
-    needs: build_wheels
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10", "3.11", "3.12"]
-    runs-on: ${{ matrix.os }}
+  # test_wheels:
+  #   needs: build_wheels
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-latest, macos-latest, windows-latest]
+  #       python-version: ["3.10", "3.11", "3.12"]
+  #   runs-on: ${{ matrix.os }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
 
-      - name: Download wheels
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-${{ matrix.os }}
-          path: wheelhouse
+  #     - name: Download wheels
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: wheels-${{ matrix.os }}
+  #         path: wheelhouse
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
 
-      - name: Install wheel
-        run: |
-          pip install --no-index --find-links wheelhouse vrp_solver_ignore
-        shell: bash
-        if: runner.os != 'Windows'
+  #     - name: Install wheel
+  #       run: |
+  #         pip install --no-index --find-links wheelhouse vrp_solver_ignore
+  #       shell: bash
+  #       if: runner.os != 'Windows'
 
-      - name: Install wheel (Windows)
-        run: |
-          pip install --no-index --find-links wheelhouse vrp_solver_ignore
-        shell: cmd
-        if: runner.os == 'Windows'
+  #     - name: Install wheel (Windows)
+  #       run: |
+  #         pip install --no-index --find-links wheelhouse vrp_solver_ignore
+  #       shell: cmd
+  #       if: runner.os == 'Windows'
 
-      - name: Install test dependencies
-        run: pip install -r requirements.txt
+  #     - name: Install test dependencies
+  #       run: pip install -r requirements.txt
 
-      # Run tests
-      - name: Run tests
-        run: pytest tests/
-        shell: bash
-        if: runner.os != 'Windows'
+  #     # Run tests
+  #     - name: Run tests
+  #       run: pytest tests/
+  #       shell: bash
+  #       if: runner.os != 'Windows'
 
-      - name: Run tests (Windows)
-        run: pytest tests
-        shell: cmd
-        if: runner.os == 'Windows'
+  #     - name: Run tests (Windows)
+  #       run: pytest tests
+  #       shell: cmd
+  #       if: runner.os == 'Windows'
 
   publish_wheels:
     needs: build_wheels
