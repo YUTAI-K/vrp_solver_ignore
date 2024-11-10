@@ -95,22 +95,22 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_BEFORE_BUILD_LINUX: |
             # Install build tools and dependencies
-            dnf install -y bzip2-devel zlib-devel xz-devel make gcc gcc-c++ wget
+            yum install -y bzip2-devel zlib-devel xz-devel make gcc gcc-c++ wget
 
-            # Install GCC 13
-            dnf install -y gcc-toolset-13
+            # Install GCC 11
+            yum install -y gcc-toolset-11
 
-            # Enable GCC 13
-            source /opt/rh/gcc-toolset-13/enable
-
-            # Set compilers
-            export CC=/opt/rh/gcc-toolset-13/root/usr/bin/gcc
-            export CXX=/opt/rh/gcc-toolset-13/root/usr/bin/g++
+            # Enable GCC 11
+            source /opt/rh/gcc-toolset-11/enable
 
             # Verify GCC version
             gcc --version
 
-            # Build Boost from source
+            # Set compilers
+            export CC=/opt/rh/gcc-toolset-11/root/usr/bin/gcc
+            export CXX=/opt/rh/gcc-toolset-11/root/usr/bin/g++
+
+            # Build Boost from source using the new compiler
             wget -O boost.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz
             tar -xzf boost.tar.gz
             cd boost_1_82_0
