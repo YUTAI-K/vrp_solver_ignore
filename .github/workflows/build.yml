@@ -38,12 +38,12 @@ jobs:
         run: |
           brew install boost cmake python@3.10 boost-python3
 
-      # Install Boost and CMake (Windows)
-      - name: Install Boost and CMake (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install -y boost-msvc-14.2 --version 1.74.0
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+      # # Install Boost and CMake (Windows)
+      # - name: Install Boost and CMake (Windows)
+      #   if: matrix.os == 'windows-latest'
+      #   run: |
+      #     choco install -y boost-msvc-14.2 --version 1.74.0
+      #     choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
 
       # Build C++ extension (macOS)
       - name: Build C++ extension (macOS)
@@ -120,18 +120,18 @@ jobs:
             chmod +x scripts/build.sh
             ./scripts/build.sh
           CIBW_BEFORE_BUILD_WINDOWS: |
-            # Install CMake via Chocolatey
+            
             choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
 
-            # Install Boost.Python via vcpkg
+            
             git clone https://github.com/microsoft/vcpkg.git
             .\vcpkg\bootstrap-vcpkg.bat
-            .\vcpkg\vcpkg.exe install boost-python3:x64-windows
+            .\vcpkg\vcpkg.exe install boost-python boost-graph
 
-            # Set VCPKG_ROOT environment variable
+            
             set VCPKG_ROOT=%CD%\vcpkg
 
-            # Build your C++ extension
+            
             scripts\build.bat
 
 
