@@ -157,9 +157,9 @@ jobs:
       - name: Collect wheels
         run: |
           mkdir -p wheelhouse
-          cp wheels_ubuntu/**/*.whl wheelhouse/ || true
-          cp wheels_macos/**/*.whl wheelhouse/ || true
-          cp wheels_windows/**/*.whl wheelhouse/ || true
+          find wheels_ubuntu -name '*.whl' -exec cp {} wheelhouse/ \; || true
+          find wheels_macos -name '*.whl' -exec cp {} wheelhouse/ \; || true
+          find wheels_windows -name '*.whl' -exec cp {} wheelhouse/ \; || true
 
       - name: Install twine
         run: pip install twine
