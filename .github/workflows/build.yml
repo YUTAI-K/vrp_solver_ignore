@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - withoutScikit
   pull_request:
     branches:
       - main
+      - withoutScikit
   release:
     types: [published]
 
