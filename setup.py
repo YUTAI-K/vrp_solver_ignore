@@ -14,9 +14,9 @@ else:
 cpp_wrapper_filename = f"cppWrapper{lib_ext}"
 cpp_wrapper_path = os.path.join("src", "vrp_solver_ignore", cpp_wrapper_filename)
 
-# Ensure the shared library exists
-if not os.path.isfile(cpp_wrapper_path):
-    raise FileNotFoundError(f"{cpp_wrapper_path} not found. Please build the C++ extension before packaging.")
+# # Ensure the shared library exists
+# if not os.path.isfile(cpp_wrapper_path):
+#     raise FileNotFoundError(f"{cpp_wrapper_path} not found. Please build the C++ extension before packaging.")
 
 # Custom distribution class to indicate that the package has ext modules
 class BinaryDistribution(Distribution):
