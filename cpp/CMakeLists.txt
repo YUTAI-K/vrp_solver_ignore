@@ -19,8 +19,7 @@ find_package(Boost REQUIRED COMPONENTS graph) # Find Boost graph component
 
 target_link_libraries(cppWrapper
         PRIVATE
-        Python3::Python
-        Python3::Module
+        ${Python3_LIBRARIES}
         Boost::python
         Boost::graph
 )
