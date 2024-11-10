@@ -3,7 +3,7 @@ from vrp_solver_ignore import vrp_graph
 
 
 # Step 1: Generate a random graph
-n_customers = 16# Number of customers in the VRP
+n_customers = 8# Number of customers in the VRP
 seed = 4643      # Seed for random number generation
 capacity = 0.2  # Vehicle capacity, set to 25% of total capacity
 
