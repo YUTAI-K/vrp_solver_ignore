@@ -91,7 +91,7 @@ jobs:
         run: |
           cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BUILD_VERBOSITY: 0
           # Build the C++ extension inside the Docker container on Linux
           CIBW_BEFORE_BUILD_LINUX: |
             # Install build tools and dependencies
