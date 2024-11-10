@@ -42,8 +42,8 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
 elif [[ "$OSTYPE" == "msys"* ]]; then
     LIB_EXT=".pyd"
 else
-    echo "Unsupported OS"
-    exit 1
+    LIB_EXT=".so"
+
 fi
 
 # Find the built shared library
