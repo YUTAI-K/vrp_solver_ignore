@@ -122,7 +122,8 @@ jobs:
         run: |
           CIBW_BUILD_VERBOSITY=1 cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 1  #
+          CIBW_BUILD_VERBOSITY: 1  
+          CIBW_SKIP: 'cp3?-manylinux*'
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact
