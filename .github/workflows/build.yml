@@ -92,7 +92,7 @@ jobs:
           cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD_VERBOSITY: 1
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux-max
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_BEFORE_BUILD_LINUX: |
             # Install build tools and dependencies
             dnf install -y bzip2-devel zlib-devel xz-devel make gcc gcc-c++ wget
