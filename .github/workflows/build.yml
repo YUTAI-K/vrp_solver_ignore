@@ -32,62 +32,40 @@ jobs:
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
-      # Install Boost and CMake
-      - name: Install Boost and CMake (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libboost-python-dev libboost-graph-dev cmake
-
+      # Install Boost and CMake (macOS)
       - name: Install Boost and CMake (macOS)
         if: matrix.os == 'macos-latest'
-        run: brew install boost cmake python@3.10 boost-python3
+        run: |
+          brew install boost cmake python@3.10 boost-python3
 
+      # Install Boost and CMake (Windows)
       - name: Install Boost and CMake (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           choco install boost-msvc
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
 
-      # Install GCC 13 on Linux
-      - name: Install GCC 13 (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-          sudo apt-get update
-          sudo apt-get install -y g++-13
-
-      # Set GCC 13 as the default compiler on Linux
-      - name: Set GCC 13 as default (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 60
-          gcc --version
-          g++ --version
-
-      # Build C++ extension (Linux/macOS)
-      - name: Build C++ extension (Linux/macOS)
+      # Build C++ extension (macOS)
+      - name: Build C++ extension (macOS)
+        if: matrix.os == 'macos-latest'
         run: |
           chmod +x scripts/build.sh
           ./scripts/build.sh
         shell: bash
-        if: matrix.os != 'windows-latest'
 
       # Build C++ extension (Windows)
       - name: Build C++ extension (Windows)
+        if: matrix.os == 'windows-latest'
         run: scripts\build.bat
         shell: cmd
-        if: matrix.os == 'windows-latest'
 
-      # List Package Directory Contents
+      # List Package Directory Contents (macOS/Windows)
       - name: List Package Directory Contents
+        if: matrix.os != 'ubuntu-latest'
         run: |
           echo "Listing contents of the package directory:"
           ls -R src/vrp_solver_ignore
         shell: bash
-        if: matrix.os != 'windows-latest'
-
 
       # Validate setup.py Packaging
       - name: Validate setup.py Packaging
@@ -95,35 +73,49 @@ jobs:
           python setup.py check --metadata --restructuredtext
         shell: bash
 
-      # Inspect the Extension Module
+      # Inspect the Extension Module (macOS)
       - name: Inspect Extension Module
+        if: matrix.os == 'macos-latest'
         run: |
           echo "Inspecting cppWrapper.so with otool:"
           otool -L src/vrp_solver_ignore/cppWrapper.so || echo "otool not found or cppWrapper.so missing."
         shell: bash
-        if: matrix.os != 'windows-latest'
 
-      # Inspect the Shared Library Symbols
-      - name: Inspect Shared Library Symbols
-        run: |
-          echo "Inspecting symbols in cppWrapper.so:"
-          nm src/vrp_solver_ignore/cppWrapper.so | grep PYBIND11_MODULE || echo "No PYBIND11_MODULE found."
-        shell: bash
-        if: matrix.os != 'windows-latest'
-
-      # Try to solve the problem of MACos compitability
+      # Set MACOSX_DEPLOYMENT_TARGET (macOS)
       - name: Set MACOSX_DEPLOYMENT_TARGET
         if: matrix.os == 'macos-latest'
         run: echo 'MACOSX_DEPLOYMENT_TARGET=14.0' >> $GITHUB_ENV
 
-
       # Build wheels with maximum verbosity
       - name: Build wheels
         run: |
-          CIBW_BUILD_VERBOSITY=1 cibuildwheel --output-dir wheelhouse
+          cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: 1  
-          CIBW_SKIP: 'cp3?-manylinux*'
+          CIBW_BUILD_VERBOSITY: 1
+          # Build the C++ extension inside the Docker container on Linux
+          CIBW_BEFORE_BUILD_LINUX: |
+            # Install build tools and dependencies
+            yum install -y bzip2-devel zlib-devel xz-devel make gcc gcc-c++ wget
+
+            # Get the Python executable path
+            PYTHON=$(which python)
+            # Get Python version
+            PYTHON_VERSION=$($PYTHON -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+
+            # Build Boost from source
+            wget -O boost.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz
+            tar -xzf boost.tar.gz
+            cd boost_1_82_0
+            ./bootstrap.sh --with-libraries=python,graph --with-python=$PYTHON
+            ./b2 install --prefix=/usr/local --with-python --with-graph link=shared python=$PYTHON_VERSION
+            cd ..
+
+            # Ensure the Boost libraries are found
+            export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
+
+            # Build your C++ extension
+            chmod +x scripts/build.sh
+            ./scripts/build.sh
 
       # Upload wheels as artifact
       - name: Upload wheels as artifact
