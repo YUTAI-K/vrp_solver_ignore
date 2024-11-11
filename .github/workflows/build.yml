@@ -105,18 +105,18 @@ jobs:
             chmod +x scripts/build.sh
             ./scripts/build.sh
           CIBW_BEFORE_BUILD_WINDOWS: |
-            echo Starting CIBW_BEFORE_BUILD_WINDOWS commands... &&
-            choco install -y cmake --installargs "ADD_CMAKE_TO_PATH=System" &&
-            echo CMake installed successfully &&
-            git clone https://github.com/microsoft/vcpkg.git &&
-            echo vcpkg cloned successfully &&
-            .\vcpkg\bootstrap-vcpkg.bat &&
-            echo vcpkg bootstrapped successfully &&
-            .\vcpkg\vcpkg.exe install boost-python boost-graph &&
-            echo boost-python and boost-graph installed successfully &&
-            set VCPKG_ROOT=%CD%\vcpkg &&
-            echo VCPKG_ROOT set to %VCPKG_ROOT% &&
-            scripts\build.bat &&
+            echo Starting CIBW_BEFORE_BUILD_WINDOWS commands...
+            choco install -y cmake --installargs "ADD_CMAKE_TO_PATH=System"
+            echo CMake installed successfully
+            git clone https://github.com/microsoft/vcpkg.git
+            echo vcpkg cloned successfully
+            .\vcpkg\bootstrap-vcpkg.bat
+            echo vcpkg bootstrapped successfully
+            .\vcpkg\vcpkg.exe install boost-python boost-graph
+            echo boost-python and boost-graph installed successfully
+            set "VCPKG_ROOT=%CD%\vcpkg"
+            echo VCPKG_ROOT set to %VCPKG_ROOT%
+            scripts\build.bat
             echo build.bat executed successfully
 
 
