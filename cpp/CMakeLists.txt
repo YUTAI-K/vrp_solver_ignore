@@ -18,7 +18,7 @@ endif()
 
 
 set(Boost_USE_STATIC_LIBS ON)
-
+add_definitions(-DBOOST_PYTHON_STATIC_LIB)
 
 find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED )
 find_package(Boost REQUIRED COMPONENTS python)
