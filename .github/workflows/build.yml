@@ -87,7 +87,7 @@ jobs:
             tar -xzf boost.tar.gz
             cd boost_1_82_0
             ./bootstrap.sh --with-libraries=python,graph --with-python=python3
-            ./b2 install --prefix=/usr/local --with-python --with-graph link=shared
+            ./b2 install --prefix=/usr/local --with-python --with-graph link=static
             cd ..
 
             # Ensure the Boost libraries are found
