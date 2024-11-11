@@ -16,6 +16,10 @@ if(APPLE)
     )
 endif()
 
+
+set(Boost_USE_STATIC_LIBS ON)
+
+
 find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED )
 find_package(Boost REQUIRED COMPONENTS python)
 find_package(Boost REQUIRED COMPONENTS graph) # Find Boost graph component
