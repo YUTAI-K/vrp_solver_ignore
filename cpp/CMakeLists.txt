@@ -21,9 +21,8 @@ set(Boost_USE_STATIC_LIBS ON)
 add_definitions(-DBOOST_PYTHON_STATIC_LIB)
 
 find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED )
-find_package(Boost REQUIRED COMPONENTS graph) # Find Boost graph component
 find_package(Boost REQUIRED COMPONENTS python)
-
+find_package(Boost REQUIRED COMPONENTS graph) # Find Boost graph component
 
 
 target_link_libraries(cppWrapper
@@ -33,9 +32,13 @@ target_link_libraries(cppWrapper
         Boost::graph
 )
 
-
-
-
+if (APPLE)
+    target_include_directories(cppWrapper
+            PRIVATE
+            ${Python3_INCLUDE_DIRS}
+            ${Boost_INCLUDE_DIRS}
+    )
+endif()
 
 # Determine the shared library extension
 if(WIN32)
