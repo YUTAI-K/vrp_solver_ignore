@@ -15,10 +15,10 @@ New-Item -ItemType Directory -Force -Path $BOOST_INSTALL_DIR
 
 # Set architecture
 if ([Environment]::Is64BitOperatingSystem) {
-    $ARCH = "x64"
+    $ARCH = "64"
     Write-Host "Detected 64-bit OS. Using architecture: $ARCH"
 } else {
-    $ARCH = "x86"
+    $ARCH = "32"
     Write-Host "Detected 32-bit OS. Using architecture: $ARCH"
 }
 
