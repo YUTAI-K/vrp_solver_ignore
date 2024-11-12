@@ -1,76 +1,168 @@
-# Install CMake using chocolatey
-choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+# prebuild.ps1
 
-# Define variables
-$BOOST_VERSION = "1.84.0"
-$BOOST_VERSION_UNDERSCORED = $BOOST_VERSION.Replace(".", "_")
-$BOOST_DOWNLOAD_URL = "https://boostorg.jfrog.io/artifactory/main/release/$BOOST_VERSION/source/boost_$BOOST_VERSION_UNDERSCORED.zip"
-$BOOST_INSTALL_DIR = "D:\a\vrp_solver_ignore\vrp_solver_ignore\boost_install"
-$DOWNLOAD_DIR = "D:\a\vrp_solver_ignore\vrp_solver_ignore\downloads"
-$BUILD_TYPE = "Release"
+# Exit immediately if a command exits with a non-zero status
+$ErrorActionPreference = "Stop"
 
-# Create directories if they don't exist
-New-Item -ItemType Directory -Force -Path $DOWNLOAD_DIR
-New-Item -ItemType Directory -Force -Path $BOOST_INSTALL_DIR
+# === Configuration ===
 
-# Set architecture
-if ([Environment]::Is64BitOperatingSystem) {
-    $ARCH = "64"
-    Write-Host "Detected 64-bit OS. Using architecture: $ARCH"
+# Define directories and versions
+$toolsDir = "$env:USERPROFILE\tools"
+$cmakeVersion = "3.26.4" # Specify the desired CMake version
+$cmakeZip = "cmake-$cmakeVersion-windows-x86_64.zip"
+$cmakeUrl = "https://github.com/Kitware/CMake/releases/download/v$cmakeVersion/$cmakeZip"
+$cmakeExtractDir = "$toolsDir\cmake-$cmakeVersion"
+
+$boostVersion = "1.83.0" # Specify the desired Boost version
+$boostZip = "boost_$($boostVersion -replace '\.', '_').zip"
+$boostUrl = "https://boostorg.jfrog.io/artifactory/main/release/$boostVersion/source/$boostZip"
+$boostSourceDir = "$toolsDir\boost_$boostVersion"
+
+# === Helper Function ===
+
+# Function to download a file from a URL to a destination path
+function Download-File($url, $destination) {
+    Write-Host "Downloading $url..."
+    Invoke-WebRequest -Uri $url -OutFile $destination
+}
+
+# === Ensure Tools Directory Exists ===
+
+if (-not (Test-Path $toolsDir)) {
+    Write-Host "Creating tools directory at $toolsDir..."
+    New-Item -ItemType Directory -Path $toolsDir | Out-Null
 } else {
-    $ARCH = "32"
-    Write-Host "Detected 32-bit OS. Using architecture: $ARCH"
+    Write-Host "Tools directory already exists: $toolsDir"
 }
 
-# Download Boost
-Write-Host "Downloading Boost $BOOST_VERSION..."
-$ProgressPreference = 'SilentlyContinue'
-Invoke-WebRequest -Uri $BOOST_DOWNLOAD_URL -OutFile "$DOWNLOAD_DIR\boost.zip"
+# === Install CMake ===
 
-# Extract Boost
-Write-Host "Extracting Boost..."
-Expand-Archive -Path "$DOWNLOAD_DIR\boost.zip" -DestinationPath $DOWNLOAD_DIR -Force
-$BOOST_SRC_DIR = "$DOWNLOAD_DIR\boost_$BOOST_VERSION_UNDERSCORED"
+if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
+    Write-Host "CMake not found. Downloading and installing CMake $cmakeVersion..."
 
-# Build Boost
-Write-Host "Building Boost..."
-Set-Location $BOOST_SRC_DIR
+    $cmakeZipPath = "$toolsDir\$cmakeZip"
+    Download-File -url $cmakeUrl -destination $cmakeZipPath
 
-# Bootstrap
-Write-Host "Running bootstrap..."
-.\bootstrap.bat
+    Write-Host "Extracting CMake..."
+    Expand-Archive -Path $cmakeZipPath -DestinationPath $toolsDir -Force
 
-# Build specific components with static linking
-Write-Host "Building Boost components..."
-$B2_ARGS = @(
-    "toolset=msvc-14.3"
-    "address-model=$ARCH"
-    "variant=release"
-    "link=static"
-    "runtime-link=static"
-    "threading=multi"
-    "--with-python"
-    "--with-graph"
-    "--prefix=$BOOST_INSTALL_DIR"
-    "install"
-)
-.\b2.exe $B2_ARGS
+    # Define the CMake bin directory
+    $cmakeBin = "$cmakeExtractDir\bin"
 
-# Add environment variables
-Write-Host "Setting up environment variables..."
-$env:BOOST_ROOT = $BOOST_INSTALL_DIR
-$env:BOOST_LIBRARYDIR = "$BOOST_INSTALL_DIR\lib"
-$env:BOOST_INCLUDEDIR = "$BOOST_INSTALL_DIR\include\boost-$BOOST_VERSION_MAJOR_$BOOST_VERSION_MINOR"
+    # Add CMake to PATH if not already present
+    if ($env:PATH -notlike "*$cmakeBin*") {
+        Write-Host "Adding CMake to PATH: $cmakeBin"
+        $env:PATH = "$cmakeBin;$env:PATH"
+    } else {
+        Write-Host "CMake bin directory already in PATH."
+    }
 
-# Add to system PATH if not already present
-$systemPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
-if (-not $systemPath.Contains($BOOST_INSTALL_DIR)) {
-    [Environment]::SetEnvironmentVariable(
-        "Path",
-        "$systemPath;$BOOST_INSTALL_DIR\lib",
-        "Machine"
-    )
+    # Clean up the downloaded zip file
+    Remove-Item $cmakeZipPath -Force
+} else {
+    Write-Host "CMake is already installed: $(cmake --version)"
 }
+
+# === Download Boost ===
+
+if (-not (Test-Path $boostSourceDir)) {
+    Write-Host "Downloading Boost $boostVersion..."
+
+    $boostZipPath = "$toolsDir\$boostZip"
+    Download-File -url $boostUrl -destination $boostZipPath
+
+    Write-Host "Extracting Boost..."
+    Expand-Archive -Path $boostZipPath -DestinationPath $toolsDir -Force
+
+    # Clean up the downloaded zip file
+    Remove-Item $boostZipPath -Force
+} else {
+    Write-Host "Boost source already exists: $boostSourceDir"
+}
+
+# === Detect Python Installation ===
+
+Write-Host "Detecting Python installation..."
+
+$pythonExe = (Get-Command python -ErrorAction SilentlyContinue)?.Source
+if (-not $pythonExe) {
+    throw "Python executable not found in PATH. Please ensure Python is installed and added to PATH."
+}
+
+Write-Host "Python executable found at: $pythonExe"
+
+# Retrieve Python version (e.g., 3.11)
+$pythonVersion = (& $pythonExe -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+Write-Host "Detected Python version: $pythonVersion"
+
+# Retrieve Python include and library directories
+$pythonInclude = (& $pythonExe -c "from sysconfig import get_paths as gp; print(gp()['include'])")
+$pythonLib = (& $pythonExe -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+
+Write-Host "Python include directory: $pythonInclude"
+Write-Host "Python library directory: $pythonLib"
+
+# === Build Boost ===
+
+$boostLibDir = "$boostSourceDir\stage\lib"
+
+if (-not (Test-Path $boostLibDir)) {
+    Write-Host "Bootstrapping Boost with specified libraries (python, graph)..."
+
+    Push-Location $boostSourceDir
+
+    # Run bootstrap.bat to prepare Boost.Build (b2)
+    & .\bootstrap.bat --with-libraries=python,graph --prefix="$boostSourceDir"
+
+    Write-Host "Building Boost libraries statically..."
+    
+    # Build Boost using b2 with static linkage and specified parameters
+    & .\b2.exe `
+        variant=release `
+        link=static `
+        runtime-link=static `
+        threading=multi `
+        address-model=64 `
+        toolset=msvc `
+        python="$pythonExe" `
+        python-version="$pythonVersion" `
+        python-root="$(Split-Path $pythonExe)" `
+        include="$pythonInclude" `
+        library-path="$pythonLib" `
+        --with-python `
+        --with-graph `
+        stage `
+        install
+
+    Pop-Location
+} else {
+    Write-Host "Boost libraries already built at: $boostLibDir"
+}
+
+# === Set Environment Variables ===
+
+Write-Host "Setting environment variables for Boost..."
+
+$env:BOOST_ROOT = $boostSourceDir
+$env:BOOST_INCLUDEDIR = "$boostSourceDir"
+$env:BOOST_LIBRARYDIR = "$boostLibDir"
+
+# Update CMAKE_PREFIX_PATH to help CMake find Boost
+if ($env:CMAKE_PREFIX_PATH) {
+    $env:CMAKE_PREFIX_PATH = "$boostSourceDir;$env:CMAKE_PREFIX_PATH"
+} else {
+    $env:CMAKE_PREFIX_PATH = "$boostSourceDir"
+}
+
+Write-Host "Environment variables set:"
+Write-Host "BOOST_ROOT = $env:BOOST_ROOT"
+Write-Host "BOOST_INCLUDEDIR = $env:BOOST_INCLUDEDIR"
+Write-Host "BOOST_LIBRARYDIR = $env:BOOST_LIBRARYDIR"
+Write-Host "CMAKE_PREFIX_PATH = $env:CMAKE_PREFIX_PATH"
+
+# === Completion Message ===
+
+Write-Host "Pre-build setup completed successfully."
+
 
 cd D:\a\vrp_solver_ignore\vrp_solver_ignore
 # Build your C++ project
