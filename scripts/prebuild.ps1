@@ -83,7 +83,9 @@ if (-not (Test-Path $boostSourceDir)) {
 
 Write-Host "Detecting Python installation..."
 
-$pythonExe = (Get-Command python -ErrorAction SilentlyContinue)?.Source
+$pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+$pythonExe = if ($pythonCommand) { $pythonCommand.Source } else { $null }
+
 if (-not $pythonExe) {
     throw "Python executable not found in PATH. Please ensure Python is installed and added to PATH."
 }
@@ -162,6 +164,7 @@ Write-Host "CMAKE_PREFIX_PATH = $env:CMAKE_PREFIX_PATH"
 # === Completion Message ===
 
 Write-Host "Pre-build setup completed successfully."
+
 
 
 cd D:\a\vrp_solver_ignore\vrp_solver_ignore
