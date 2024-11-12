@@ -1,6 +1,7 @@
 @echo off
 SETLOCAL ENABLEDELAYEDEXPANSION
 
+cd D:\a\vrp_solver_ignore\vrp_solver_ignore
 echo ============================
 echo Starting build.bat
 echo Current directory: %CD%
@@ -15,8 +16,8 @@ cd build
 echo Changed directory to build: %CD%
 
 REM Configure CMake
-echo Running CMake with toolchain file: %VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake
-cmake -DCMAKE_BUILD_TYPE=Release 
+echo Running CMake 
+cmake .. -DCMAKE_BUILD_TYPE=Release 
 
 REM Build the shared library
 cmake --build . --config Release
