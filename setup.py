@@ -25,7 +25,7 @@ class BinaryDistribution(Distribution):
 
 setup(
     name="vrp_solver_ignore",
-    version="0.1.1",
+    version="0.2.0",
     description="A Vehicle Routing Problem solver with custom strategy, please visit the GitHub page for details.",
     author="Yutai Ke",
     author_email="yutai.ke@bse.eu",

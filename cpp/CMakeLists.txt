@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(cppWrapper)
 set(CMAKE_CXX_STANDARD 23)
-cmake_policy(SET CMP0167 OLD)          # Prefer FindBoost over BoostConfig
+
 # Add the Python module
 add_library(cppWrapper MODULE
         src/library.cpp
@@ -21,8 +21,9 @@ set(Boost_USE_STATIC_LIBS ON)
 add_definitions(-DBOOST_PYTHON_STATIC_LIB)
 
 find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED )
-find_package(Boost REQUIRED COMPONENTS python)
 find_package(Boost REQUIRED COMPONENTS graph) # Find Boost graph component
+find_package(Boost REQUIRED COMPONENTS python)
+
 
 
 target_link_libraries(cppWrapper
@@ -33,11 +34,7 @@ target_link_libraries(cppWrapper
 )
 
 
-target_include_directories(cppWrapper
-        PRIVATE
-        ${Python3_INCLUDE_DIRS}
-        ${Boost_INCLUDE_DIRS}
-)
+
 
 
 # Determine the shared library extension

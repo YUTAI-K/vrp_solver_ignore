@@ -19,7 +19,7 @@ REM Configure CMake
 echo Running CMake with toolchain file: %VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake
 cmake .. -DCMAKE_BUILD_TYPE=Release ^
         -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ^
-        -A x64
+        -DVCPKG_TARGET_TRIPLET=%TRIPLET% ^
 
 REM Build the shared library
 cmake --build . --config Release
