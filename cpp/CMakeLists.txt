@@ -32,7 +32,7 @@ target_link_libraries(cppWrapper
         Boost::graph
 )
 
-if (APPLE)
+if (UNIX)
     target_include_directories(cppWrapper
             PRIVATE
             ${Python3_INCLUDE_DIRS}
