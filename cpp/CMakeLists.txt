@@ -21,6 +21,8 @@ set(Boost_USE_STATIC_LIBS ON)
 add_definitions(-DBOOST_PYTHON_STATIC_LIB)
 
 if(WIN32)
+    set(Boost_TOOLSET "msvc-14.4")
+
     set(BOOST_ROOT "${BOOST_INSTALL_DIR}")
     set(Boost_INCLUDE_DIR "${BOOST_INCLUDEDIR}")
     set(Boost_LIBRARY_DIR "${BOOST_LIBRARYDIR}")
