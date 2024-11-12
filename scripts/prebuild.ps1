@@ -7,15 +7,15 @@ $ErrorActionPreference = "Stop"
 
 # Define directories and versions
 $toolsDir = "$env:USERPROFILE\tools"
-$cmakeVersion = "3.26.4" # Specify the desired CMake version
+$cmakeVersion = "3.30.5" # Updated to match the installed version in your log
 $cmakeZip = "cmake-$cmakeVersion-windows-x86_64.zip"
 $cmakeUrl = "https://github.com/Kitware/CMake/releases/download/v$cmakeVersion/$cmakeZip"
 $cmakeExtractDir = "$toolsDir\cmake-$cmakeVersion"
 
 $boostVersion = "1.83.0" # Specify the desired Boost version
-$boostZip = "boost_$($boostVersion -replace '\.', '_').zip"
-$boostUrl = "https://boostorg.jfrog.io/artifactory/main/release/$boostVersion/source/$boostZip"
-$boostSourceDir = "$toolsDir\boost_$boostVersion"
+$boostZip = "boost_$($boostVersion -replace '\.', '_').zip" # Results in boost_1_83_0.zip
+$boostExtractedFolder = "boost_$($boostVersion -replace '\.', '_')" # boost_1_83_0
+$boostSourceDir = "$toolsDir\$boostExtractedFolder" # Corrected path
 
 # === Helper Function ===
 
@@ -92,16 +92,34 @@ if (-not $pythonExe) {
 
 Write-Host "Python executable found at: $pythonExe"
 
-# Retrieve Python version (e.g., 3.11)
+# Retrieve Python version (e.g., 3.10)
 $pythonVersion = (& $pythonExe -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 Write-Host "Detected Python version: $pythonVersion"
 
 # Retrieve Python include and library directories
 $pythonInclude = (& $pythonExe -c "from sysconfig import get_paths as gp; print(gp()['include'])")
-$pythonLib = (& $pythonExe -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+$pythonLib = (& $pythonExe -c "import sysconfig; libdir = sysconfig.get_config_var('LIBDIR'); print(libdir if libdir else 'None')")
 
 Write-Host "Python include directory: $pythonInclude"
 Write-Host "Python library directory: $pythonLib"
+
+if ($pythonLib -eq "None") {
+    # Attempt to retrieve the library directory using an alternative method
+    Write-Host "Python library directory not found using sysconfig. Attempting alternative retrieval..."
+
+    # Retrieve the path to the Python library (e.g., python310.lib)
+    $pythonLibPath = (& $pythonExe -c "import sysconfig; print(sysconfig.get_config_var('LIBRARY'))")
+    if ($pythonLibPath) {
+        $pythonLibDir = Split-Path $pythonLibPath
+        Write-Host "Alternative Python library directory: $pythonLibDir"
+        $pythonLib = $pythonLibDir
+    } else {
+        throw "Unable to determine Python library directory."
+    }
+} else {
+    # If LIBDIR is available, use it
+    $pythonLibDir = $pythonLib
+}
 
 # === Build Boost ===
 
@@ -164,7 +182,6 @@ Write-Host "CMAKE_PREFIX_PATH = $env:CMAKE_PREFIX_PATH"
 # === Completion Message ===
 
 Write-Host "Pre-build setup completed successfully."
-
 
 
 cd D:\a\vrp_solver_ignore\vrp_solver_ignore
