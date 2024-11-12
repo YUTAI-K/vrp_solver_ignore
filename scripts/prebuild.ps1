@@ -14,14 +14,33 @@ $cmakeExtractDir = "$toolsDir\cmake-$cmakeVersion"
 
 $boostVersion = "1.83.0" # Specify the desired Boost version
 $boostZip = "boost_$($boostVersion -replace '\.', '_').zip" # Results in boost_1_83_0.zip
+$boostUrl = "https://boostorg.jfrog.io/artifactory/main/release/$boostVersion/source/$boostZip"
 $boostExtractedFolder = "boost_$($boostVersion -replace '\.', '_')" # boost_1_83_0
-$boostSourceDir = "$toolsDir\$boostExtractedFolder" # Corrected path
+$boostSourceDir = "$toolsDir\$boostExtractedFolder" # C:\Users\runneradmin\tools\boost_1_83_0
+
+# === Debugging: Print Configuration Variables ===
+Write-Host "=== Configuration Variables ==="
+Write-Host "toolsDir: $toolsDir"
+Write-Host "cmakeVersion: $cmakeVersion"
+Write-Host "cmakeZip: $cmakeZip"
+Write-Host "cmakeUrl: $cmakeUrl"
+Write-Host "cmakeExtractDir: $cmakeExtractDir"
+Write-Host "boostVersion: $boostVersion"
+Write-Host "boostZip: $boostZip"
+Write-Host "boostUrl: $boostUrl"
+Write-Host "boostExtractedFolder: $boostExtractedFolder"
+Write-Host "boostSourceDir: $boostSourceDir"
+Write-Host "===============================`n"
 
 # === Helper Function ===
 
 # Function to download a file from a URL to a destination path
 function Download-File($url, $destination) {
-    Write-Host "Downloading $url..."
+    Write-Host "Downloading from URL: $url"
+    Write-Host "Saving to: $destination`n"
+    if ([string]::IsNullOrEmpty($url)) {
+        throw "Download-File called with an empty or null URL."
+    }
     Invoke-WebRequest -Uri $url -OutFile $destination
 }
 
@@ -33,12 +52,13 @@ if (-not (Test-Path $toolsDir)) {
 } else {
     Write-Host "Tools directory already exists: $toolsDir"
 }
+Write-Host ""
 
 # === Install CMake ===
 
 if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
     Write-Host "CMake not found. Downloading and installing CMake $cmakeVersion..."
-
+    
     $cmakeZipPath = "$toolsDir\$cmakeZip"
     Download-File -url $cmakeUrl -destination $cmakeZipPath
 
@@ -62,6 +82,8 @@ if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
     Write-Host "CMake is already installed: $(cmake --version)"
 }
 
+Write-Host ""
+
 # === Download Boost ===
 
 if (-not (Test-Path $boostSourceDir)) {
@@ -78,6 +100,8 @@ if (-not (Test-Path $boostSourceDir)) {
 } else {
     Write-Host "Boost source already exists: $boostSourceDir"
 }
+
+Write-Host ""
 
 # === Detect Python Installation ===
 
@@ -101,7 +125,7 @@ $pythonInclude = (& $pythonExe -c "from sysconfig import get_paths as gp; print(
 $pythonLib = (& $pythonExe -c "import sysconfig; libdir = sysconfig.get_config_var('LIBDIR'); print(libdir if libdir else 'None')")
 
 Write-Host "Python include directory: $pythonInclude"
-Write-Host "Python library directory: $pythonLib"
+Write-Host "Python library directory: $pythonLib`n"
 
 if ($pythonLib -eq "None") {
     # Attempt to retrieve the library directory using an alternative method
@@ -109,9 +133,9 @@ if ($pythonLib -eq "None") {
 
     # Retrieve the path to the Python library (e.g., python310.lib)
     $pythonLibPath = (& $pythonExe -c "import sysconfig; print(sysconfig.get_config_var('LIBRARY'))")
-    if ($pythonLibPath) {
+    if ($pythonLibPath -ne "") {
         $pythonLibDir = Split-Path $pythonLibPath
-        Write-Host "Alternative Python library directory: $pythonLibDir"
+        Write-Host "Alternative Python library directory: $pythonLibDir`n"
         $pythonLib = $pythonLibDir
     } else {
         throw "Unable to determine Python library directory."
@@ -126,7 +150,7 @@ if ($pythonLib -eq "None") {
 $boostLibDir = "$boostSourceDir\stage\lib"
 
 if (-not (Test-Path $boostLibDir)) {
-    Write-Host "Bootstrapping Boost with specified libraries (python, graph)..."
+    Write-Host "Bootstrapping Boost with specified libraries (python, graph)...`n"
 
     Push-Location $boostSourceDir
 
@@ -158,6 +182,8 @@ if (-not (Test-Path $boostLibDir)) {
     Write-Host "Boost libraries already built at: $boostLibDir"
 }
 
+Write-Host ""
+
 # === Set Environment Variables ===
 
 Write-Host "Setting environment variables for Boost..."
@@ -177,7 +203,7 @@ Write-Host "Environment variables set:"
 Write-Host "BOOST_ROOT = $env:BOOST_ROOT"
 Write-Host "BOOST_INCLUDEDIR = $env:BOOST_INCLUDEDIR"
 Write-Host "BOOST_LIBRARYDIR = $env:BOOST_LIBRARYDIR"
-Write-Host "CMAKE_PREFIX_PATH = $env:CMAKE_PREFIX_PATH"
+Write-Host "CMAKE_PREFIX_PATH = $env:CMAKE_PREFIX_PATH`n"
 
 # === Completion Message ===
 
