@@ -1,7 +1,6 @@
 @echo off
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-cd D:\a\vrp_solver_ignore\vrp_solver_ignore
 echo ============================
 echo Starting build.bat
 echo Current directory: %CD%

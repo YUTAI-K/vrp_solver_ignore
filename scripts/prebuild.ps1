@@ -72,7 +72,7 @@ if (-not $systemPath.Contains($BOOST_INSTALL_DIR)) {
     )
 }
 
-
+cd D:\a\vrp_solver_ignore\vrp_solver_ignore
 # Build your C++ project
 Write-Host "Building C++ project..."
 .\scripts\build.bat
