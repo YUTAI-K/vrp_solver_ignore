@@ -4,7 +4,6 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 echo ============================
 echo Starting build.bat
 echo Current directory: %CD%
-echo VCPKG_ROOT: %VCPKG_ROOT%
 echo ============================
 
 REM Navigate to the C++ directory
@@ -17,9 +16,7 @@ echo Changed directory to build: %CD%
 
 REM Configure CMake
 echo Running CMake with toolchain file: %VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake
-cmake .. -DCMAKE_BUILD_TYPE=Release ^
-        -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ^
-        -DVCPKG_TARGET_TRIPLET=%TRIPLET% ^
+cmake -DCMAKE_BUILD_TYPE=Release 
 
 REM Build the shared library
 cmake --build . --config Release

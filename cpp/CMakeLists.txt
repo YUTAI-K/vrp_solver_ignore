@@ -16,6 +16,12 @@ if(APPLE)
     )
 endif()
 
+if(WIN32)
+    # Specify the Boost installation directory
+    set(BOOST_ROOT "D:/a/vrp_solver_ignore/vrp_solver_ignore/boost_1_82_0/stage")
+    set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
+    set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
+endif()
 
 set(Boost_USE_STATIC_LIBS ON)
 add_definitions(-DBOOST_PYTHON_STATIC_LIB)

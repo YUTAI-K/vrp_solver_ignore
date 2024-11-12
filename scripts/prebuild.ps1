@@ -1,15 +1,15 @@
 choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-echo "Now set up vcpkg"
-git clone https://github.com/microsoft/vcpkg.git
-$env:VCPKG_ROOT = "D:\a\vrp_solver_ignore\vrp_solver_ignore\vcpkg"
-.\vcpkg\bootstrap-vcpkg.bat
-if ([Environment]::Is64BitOperatingSystem) {
-    $triplet = "x64-windows-static"
-    Write-Host "Detected 64-bit OS. Using triplet: $triplet"
-} else {
-    $triplet = "x86-windows-static"
-    Write-Host "Detected 32-bit OS. Using triplet: $triplet"
-}
-.\vcpkg\vcpkg.exe install boost-python boost-graph --triplet $triplet
-echo "Now build cpp proj"
+cd D:\a\vrp_solver_ignore\vrp_solver_ignore\
+$boostVersion = "1.82.0"
+$boostZip = "boost_$($boostVersion)_0.zip"
+$boostUrl = "https://boostorg.jfrog.io/artifactory/main/release/$boostVersion/source/$boostZip"
+$boostZipPath = "D:\a\vrp_solver_ignore\vrp_solver_ignore\$boostZip"
+
+Invoke-WebRequest -Uri $boostUrl -OutFile $boostZipPath
+Expand-Archive -Path $boostZipPath -DestinationPath D:\a\vrp_solver_ignore\vrp_solver_ignore\
+cd D:\a\vrp_solver_ignore\vrp_solver_ignore\boost_1_82_0
+.\bootstrap.bat
+.\b2.exe --build-type=complete --prefix=D:\a\vrp_solver_ignore\vrp_solver_ignore\boost_1_82_0\stage --with-python address-model=64 link=static runtime-link=static threading=multi install
+
+cd D:\a\vrp_solver_ignore\vrp_solver_ignore\
 .\scripts\build.bat
