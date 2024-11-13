@@ -4,11 +4,6 @@ $env:VCPKG_ROOT = "D:\a\vrp_solver_ignore\vrp_solver_ignore\vcpkg"
 .\vcpkg\bootstrap-vcpkg.bat
 
 
-# Function to display errors and exit
-function Throw-ErrorAndExit($message) {
-    Write-Error $message
-    exit 1
-}
 
 # Determine the target architecture based on CIBW_ARCHITECTURE
 switch ($env:CIBW_ARCHITECTURE) {
@@ -23,9 +18,6 @@ switch ($env:CIBW_ARCHITECTURE) {
     "arm64"  { 
         $TRIPLET = "arm64-windows-static"
         $CMAKE_PLATFORM = "ARM64"
-    }
-    default  { 
-        Throw-ErrorAndExit "Unsupported architecture: $($env:CIBW_ARCHITECTURE)"
     }
 }
 
