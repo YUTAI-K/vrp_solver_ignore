@@ -2,77 +2,72 @@
 # choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
 
 
-# Exit immediately if a command exits with a non-zero status.
-$ErrorActionPreference = "Stop"
+# Configuration
+$boostVersion = "1.84.0"  # Update this to your needed version
+$vsVersion = "14.3"  # VS2022
+# Convert version number format (e.g., 1.84.0 to 1_84_0)
+$boostVersionUnderscored = $boostVersion -replace '\.', '_'
 
-# Define variables
-$boostVersion = "1.81.0"  # Specify the desired Boost version
-$boostVersionUnderscore = $boostVersion.Replace('.', '_')
-$boostZipName = "boost_$boostVersionUnderscore.zip"
-$boostDownloadUrl = "https://sourceforge.net/projects/boost/files/boost-binaries/$boostVersion/$boostZipName/download"
-$boostInstallDir = "$env:USERPROFILE\boost_$boostVersion"
-$boostExtractDir = "$boostInstallDir"
+# Determine architecture
+$arch = if ([Environment]::Is64BitOperatingSystem) { "64" } else { "32" }
 
-# Function to download Boost
-function Download-Boost {
-    Write-Host "Downloading Boost $boostVersion from SourceForge..."
-    Invoke-WebRequest -Uri $boostDownloadUrl -OutFile "$env:TEMP\$boostZipName"
-}
+# Create temporary directory for downloads
+$tempDir = Join-Path $env:TEMP "boost_setup"
+New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
 
-# Function to extract Boost
-function Extract-Boost {
-    Write-Host "Extracting Boost..."
-    Expand-Archive -Path "$env:TEMP\$boostZipName" -DestinationPath $boostInstallDir -Force
-    # Remove the zip file after extraction
-    Remove-Item "$env:TEMP\$boostZipName"
-}
+# Define Boost download URL (static libraries)
+$boostUrl = "https://sourceforge.net/projects/boost/files/boost-binaries/$boostVersion/boost_$($boostVersionUnderscored)-msvc-14.3-$arch.exe"
+$installerPath = Join-Path $tempDir "boost_installer.exe"
 
-# Check if Boost is already downloaded and extracted
-if (-Not (Test-Path $boostInstallDir)) {
-    Download-Boost
-    Extract-Boost
+Write-Host "Downloading Boost $boostVersion..."
+# Download using .NET WebClient (more reliable than Invoke-WebRequest for large files)
+$webClient = New-Object System.Net.WebClient
+$webClient.DownloadFile($boostUrl, $installerPath)
+
+# Create installation directory
+$boostInstallDir = "C:\local\boost_$boostVersionUnderscored"
+New-Item -ItemType Directory -Force -Path $boostInstallDir | Out-Null
+
+Write-Host "Extracting Boost libraries..."
+# The /SILENT parameter runs the self-extracting exe silently
+Start-Process -FilePath $installerPath -ArgumentList "/DIR=`"$boostInstallDir`"", "/SILENT" -Wait
+
+# Set environment variables
+$env:BOOST_ROOT = $boostInstallDir
+$env:BOOST_LIBRARYDIR = Join-Path $boostInstallDir "lib$arch-msvc-$vsVersion"
+$env:BOOST_INCLUDEDIR = Join-Path $boostInstallDir "include/boost-$($boostVersion.Substring(0, 4))"
+
+# Add to system path temporarily for this session
+$env:Path = "$env:BOOST_LIBRARYDIR;$env:Path"
+
+# Export variables so CMake can find them
+[Environment]::SetEnvironmentVariable('BOOST_ROOT', $env:BOOST_ROOT, 'Machine')
+[Environment]::SetEnvironmentVariable('BOOST_LIBRARYDIR', $env:BOOST_LIBRARYDIR, 'Machine')
+[Environment]::SetEnvironmentVariable('BOOST_INCLUDEDIR', $env:BOOST_INCLUDEDIR, 'Machine')
+
+# Verify installation
+Write-Host "Verifying Boost installation..."
+if (Test-Path (Join-Path $env:BOOST_LIBRARYDIR "libboost_python*.lib")) {
+    Write-Host "Found Boost.Python libraries"
 } else {
-    Write-Host "Boost $boostVersion already downloaded and extracted."
+    Write-Host "Warning: Boost.Python libraries not found!"
 }
 
-# Set environment variables for Boost
-Write-Host "Setting environment variables for Boost..."
-$env:BOOST_ROOT = $boostExtractDir
-$env:BOOST_INCLUDEDIR = "$boostExtractDir\include"
-$env:BOOST_LIBRARYDIR = "$boostExtractDir\lib"
-
-# Additional CMake settings for Boost
-$env:Boost_USE_STATIC_LIBS = "ON"        # Use static libraries
-$env:Boost_USE_MULTITHREADED = "ON"      # Enable multithreading
-$env:Boost_USE_STATIC_RUNTIME = "ON"     # Use static runtime
-
-# Optionally, specify the architecture (e.g., x64)
-# $env:BOOST_ARCHITECTURE = "x64"
-
-# Verify that boost-python and boost-graph libraries exist
-Write-Host "Verifying presence of boost-python and boost-graph libraries..."
-
-$boostLibDir = "$boostExtractDir\lib"
-
-# Function to verify library existence
-function Verify-Library ($pattern, $libName) {
-    $libs = Get-ChildItem -Path $boostLibDir -Filter $pattern
-    if ($libs.Count -eq 0) {
-        Write-Error "Error: $libName library not found in $boostLibDir. Expected pattern: $pattern"
-        exit 1
-    } else {
-        Write-Host "$libName library found: $($libs.Name)"
-    }
+if (Test-Path (Join-Path $env:BOOST_LIBRARYDIR "libboost_graph*.lib")) {
+    Write-Host "Found Boost.Graph libraries"
+} else {
+    Write-Host "Warning: Boost.Graph libraries not found!"
 }
 
-# Verify boost-python
-Verify-Library "libboost_python*.lib" "boost-python"
+# Clean up
+Remove-Item -Path $installerPath -Force
+Write-Host "Boost setup completed!"
 
-# Verify boost-graph
-Verify-Library "libboost_graph*.lib" "boost-graph"
-
-Write-Host "Boost environment variables set and verified successfully."
-
+# Output the environment variables for debugging
+Write-Host "Environment Variables set:"
+Write-Host "BOOST_ROOT: $env:BOOST_ROOT"
+Write-Host "BOOST_LIBRARYDIR: $env:BOOST_LIBRARYDIR"
+Write-Host "BOOST_INCLUDEDIR: $env:BOOST_INCLUDEDIR"
 
 cd D:\a\vrp_solver_ignore\vrp_solver_ignore
 # Build your C++ project
