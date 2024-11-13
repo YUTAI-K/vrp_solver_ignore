@@ -1,8 +1,6 @@
 # Install CMake using chocolatey
 # choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-# prebuild.ps1
 
-# prebuild.ps1
 
 # Exit immediately if a command exits with a non-zero status.
 $ErrorActionPreference = "Stop"
