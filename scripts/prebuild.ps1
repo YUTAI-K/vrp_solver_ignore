@@ -13,7 +13,10 @@ git clone https://github.com/microsoft/vcpkg.git
 $env:VCPKG_ROOT = "D:\a\vrp_solver_ignore\vrp_solver_ignore\vcpkg"
 .\vcpkg\bootstrap-vcpkg.bat
 
-
+# Debugging: Output all environment variables
+Write-Host "----- Environment Variables -----"
+Get-ChildItem Env:
+Write-Host "---------------------------------"
 
 # Determine the target architecture based on CIBW_ARCHITECTURE
 switch ($env:CIBW_ARCHITECTURE) {
