@@ -41,6 +41,6 @@ Write-Host "Selected vcpkg triplet: $TRIPLET"
 Write-Host "CMake platform: $CMAKE_PLATFORM"
 
 
-.\vcpkg\vcpkg.exe install boost-python boost-graph --triplet $TRIPLET
+.\vcpkg\vcpkg.exe install boost-python boost-graph --triplet $TRIPLET --quiet
 echo "Now build cpp proj"
 .\scripts\build.bat
