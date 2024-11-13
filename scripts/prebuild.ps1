@@ -57,7 +57,7 @@ $env:BOOST_INCLUDEDIR = (Join-Path $boostRoot "")
 
 Write-Host "Boost build complete. BOOST_ROOT set to $env:BOOST_ROOT"
 
-}
+
 
 cd D:\a\vrp_solver_ignore\vrp_solver_ignore
 # Build your C++ project
