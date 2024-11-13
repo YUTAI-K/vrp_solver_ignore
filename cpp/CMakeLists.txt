@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(cppWrapper)
 set(CMAKE_CXX_STANDARD 23)
-
+cmake_policy(SET CMP0167 OLD)          # Prefer FindBoost over BoostConfig
 # Add the Python module
 add_library(cppWrapper MODULE
         src/library.cpp
@@ -16,9 +16,18 @@ if(APPLE)
     )
 endif()
 
+if (WIN32)
+    # Set static runtime for MSVC
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
+    # Prevent Boost from auto-linking
+    add_definitions(-DBOOST_ALL_NO_LIB)
+endif()
+# Print CMAKE_PREFIX_PATH and CMAKE_FIND_ROOT_PATH for debugging
+message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+message(STATUS "CMAKE_FIND_ROOT_PATH: ${CMAKE_FIND_ROOT_PATH}")
 set(Boost_USE_STATIC_LIBS ON)
-add_definitions(-DBOOST_PYTHON_STATIC_LIB)
+# add_definitions(-DBOOST_PYTHON_STATIC_LIB)
 
 find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED )
 find_package(Boost REQUIRED COMPONENTS python)

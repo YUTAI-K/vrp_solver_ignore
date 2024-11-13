@@ -42,5 +42,10 @@ Write-Host "CMake platform: $CMAKE_PLATFORM"
 
 
 .\vcpkg\vcpkg.exe install boost-python boost-graph --triplet $TRIPLET 
+
+
+tree "D:\a\vrp_solver_ignore\vrp_solver_ignore\vcpkg" /F
+
+
 echo "Now build cpp proj"
 .\scripts\build.bat
