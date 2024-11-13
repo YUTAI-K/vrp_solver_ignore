@@ -19,7 +19,7 @@ Get-ChildItem Env:
 Write-Host "---------------------------------"
 
 # Determine the target architecture based on CIBW_ARCHITECTURE
-switch ($env:CIBW_ARCHITECTURE) {
+switch ($env:RUNNER_ARCH) {
     "x86"    { 
         $TRIPLET = "x86-windows-static"
         $CMAKE_PLATFORM = "Win32"
