@@ -4,6 +4,11 @@ $env:VCPKG_ROOT = "D:\a\vrp_solver_ignore\vrp_solver_ignore\vcpkg"
 .\vcpkg\bootstrap-vcpkg.bat
 
 
+# Function to display errors and exit
+function Throw-ErrorAndExit($message) {
+    Write-Error $message
+    exit 1
+}
 
 # Determine the target architecture based on CIBW_ARCHITECTURE
 switch ($env:CIBW_ARCHITECTURE) {
