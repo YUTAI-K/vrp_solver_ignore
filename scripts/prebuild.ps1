@@ -1,3 +1,13 @@
+# Enable strict mode for better error handling
+Set-StrictMode -Version Latest
+
+# Function to display errors and exit
+function Throw-ErrorAndExit($message) {
+    Write-Error $message
+    exit 1
+}
+
+
 git clone https://github.com/microsoft/vcpkg.git
 
 $env:VCPKG_ROOT = "D:\a\vrp_solver_ignore\vrp_solver_ignore\vcpkg"
@@ -18,6 +28,9 @@ switch ($env:CIBW_ARCHITECTURE) {
     "arm64"  { 
         $TRIPLET = "arm64-windows-static"
         $CMAKE_PLATFORM = "ARM64"
+    }
+    default  { 
+        Throw-ErrorAndExit "Unsupported architecture: $($env:CIBW_ARCHITECTURE)"
     }
 }
 
