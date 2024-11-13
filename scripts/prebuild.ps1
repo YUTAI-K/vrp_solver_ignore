@@ -5,21 +5,29 @@ $env:VCPKG_ROOT = "D:\a\vrp_solver_ignore\vrp_solver_ignore\vcpkg"
 
 
 
-REM Determine the target architecture based on CIBW_ARCHITECTURE
-if "%CIBW_ARCHITECTURE%"=="x86" (
-    set "TRIPLET=x86-windows-static"
-) else if "%CIBW_ARCHITECTURE%"=="x64" (
-    set "TRIPLET=x64-windows-static"
-) else if "%CIBW_ARCHITECTURE%"=="arm64" (
-    set "TRIPLET=arm64-windows-static"
-) else (
-    echo Unsupported architecture: %CIBW_ARCHITECTURE%
-    exit /b 1
-)
+# Determine the target architecture based on CIBW_ARCHITECTURE
+switch ($env:CIBW_ARCHITECTURE) {
+    "x86"    { 
+        $TRIPLET = "x86-windows-static"
+        $CMAKE_PLATFORM = "Win32"
+    }
+    "x64"    { 
+        $TRIPLET = "x64-windows-static"
+        $CMAKE_PLATFORM = "x64"
+    }
+    "arm64"  { 
+        $TRIPLET = "arm64-windows-static"
+        $CMAKE_PLATFORM = "ARM64"
+    }
+    default  { 
+        Throw-ErrorAndExit "Unsupported architecture: $($env:CIBW_ARCHITECTURE)"
+    }
+}
 
-echo Selected vcpkg triplet: %TRIPLET%
+Write-Host "Selected vcpkg triplet: $TRIPLET"
+Write-Host "CMake platform: $CMAKE_PLATFORM"
 
 
-.\vcpkg\vcpkg.exe install boost-python boost-graph %TRIPLET%
+.\vcpkg\vcpkg.exe install boost-python boost-graph --triplet $TRIPLET
 echo "Now build cpp proj"
 .\scripts\build.bat
