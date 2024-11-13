@@ -2,61 +2,94 @@
 # choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
 # prebuild.ps1
 
-# Specify the Boost version
-$boostVersion = "1.83.0"
-$boostVersionUnderscore = $boostVersion -replace '\.', '_'
-$boostZip = "boost_$boostVersionUnderscore.zip"
-$boostUrl = "https://boostorg.jfrog.io/artifactory/main/release/$boostVersion/source/$boostZip"
+#!/usr/bin/env pwsh
+<#
+.SYNOPSIS
+    Pre-build script for cibuildwheel to compile C++ code and set up Boost dependencies.
 
-Write-Host "Downloading Boost $boostVersion from $boostUrl..."
+.DESCRIPTION
+    This script performs the following actions:
+    1. Clones the vcpkg repository if it doesn't exist.
+    2. Bootstraps vcpkg.
+    3. Installs boost-python3 and boost-graph with static linkage.
+    4. Sets environment variables for CMake to locate Boost and its dependencies.
 
-# Download Boost
-Invoke-WebRequest -Uri $boostUrl -OutFile $boostZip
+.NOTES
+    Ensure that Git is installed and available in the system PATH.
+    This script assumes a 64-bit Windows environment.
+#>
 
-Write-Host "Extracting Boost..."
-# Extract Boost
-Expand-Archive -Path $boostZip -DestinationPath .
+# Exit immediately if a command exits with a non-zero status
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
-$boostDir = "boost_$boostVersionUnderscore"
+# Define variables
+$vcpkgRepoUrl = "https://github.com/microsoft/vcpkg.git"
+$vcpkgDir = "$env:LOCALAPPDATA\vcpkg"
+$triplet = "x64-windows-static"
 
-# Change directory to Boost
-Set-Location .\$boostDir
+# Function to display messages
+function Write-Log {
+    param (
+        [string]$Message
+    )
+    Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')]: $Message"
+}
 
-Write-Host "Bootstrapping Boost.Build..."
-# Bootstrap Boost.Build
-.\bootstrap.bat
+Write-Log "Starting pre-build steps..."
 
-Write-Host "Retrieving Python information..."
-# Get Python information
-$pythonExe = & python -c "import sys; print(sys.executable)"
-$pythonVersion = & python -c "import sys; print('{}.{}'.format(sys.version_info[0], sys.version_info[1]))"
-$pythonRoot = Split-Path -Parent $pythonExe
-$pythonArchitecture = & python -c "import sys; print('64' if sys.maxsize > 2**32 else '32')"
-$addressModel = $pythonArchitecture
+# Step 1: Clone vcpkg if it doesn't exist
+if (-Not (Test-Path $vcpkgDir)) {
+    Write-Log "Cloning vcpkg repository..."
+    git clone $vcpkgRepoUrl $vcpkgDir
+} else {
+    Write-Log "vcpkg repository already exists at '$vcpkgDir'."
+}
 
-Write-Host "Building Boost libraries..."
-# Build Boost libraries statically
-.\b2 `
-  address-model=$addressModel `
-  link=static `
-  runtime-link=static `
-  threading=multi `
-  variant=release `
-  --with-python `
-  --with-graph `
-  python=$pythonVersion `
-  python-root="$pythonRoot" `
-  stage
+# Navigate to vcpkg directory
+Set-Location $vcpkgDir
 
-Write-Host "Setting environment variables for CMake..."
-# Set environment variables for CMake
-$boostRoot = (Get-Location).Path
-$env:BOOST_ROOT = $boostRoot
-$env:BOOST_LIBRARYDIR = (Join-Path $boostRoot "stage\lib")
-$env:BOOST_INCLUDEDIR = (Join-Path $boostRoot "")
+# Step 2: Bootstrap vcpkg
+if (-Not (Test-Path "$vcpkgDir\vcpkg.exe")) {
+    Write-Log "Bootstrapping vcpkg..."
+    & .\bootstrap-vcpkg.bat
+} else {
+    Write-Log "vcpkg is already bootstrapped."
+}
 
-Write-Host "Boost build complete. BOOST_ROOT set to $env:BOOST_ROOT"
+# Step 3: Install Boost libraries with static linkage
+Write-Log "Installing Boost libraries: boost-python3 and boost-graph..."
+& .\vcpkg.exe install boost-python3 boost-graph --triplet $triplet --recurse
 
+# Verify installation
+if (-Not (Test-Path "$vcpkgDir\installed\$triplet")) {
+    throw "Boost libraries installation failed."
+} else {
+    Write-Log "Boost libraries installed successfully."
+}
+
+# Step 4: Set environment variables for CMake
+Write-Log "Setting environment variables for CMake..."
+
+$env:CMAKE_TOOLCHAIN_FILE = "$vcpkgDir\scripts\buildsystems\vcpkg.cmake"
+$env:BOOST_ROOT = "$vcpkgDir\installed\$triplet"
+$env:BOOST_INCLUDEDIR = "$vcpkgDir\installed\$triplet\include"
+$env:BOOST_LIBRARYDIR = "$vcpkgDir\installed\$triplet\lib"
+
+# Optionally, add Boost binaries to PATH if needed
+$boostBinPath = "$vcpkgDir\installed\$triplet\bin"
+if (-Not ($env:PATH -split ';' | Select-String -SimpleMatch $boostBinPath)) {
+    $env:PATH = "$boostBinPath;$env:PATH"
+    Write-Log "Added Boost binaries to PATH."
+}
+
+Write-Log "Environment variables set successfully."
+
+# Final message
+Write-Log "Pre-build steps completed successfully."
+
+# Optionally, return to the original directory
+# Set-Location $OriginalLocation
 
 
 cd D:\a\vrp_solver_ignore\vrp_solver_ignore
